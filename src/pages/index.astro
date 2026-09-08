@@ -1,0 +1,167 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { fmtDate } from '../lib/format';
+import { getSiteStats, fmtChars } from '../lib/stats';
+
+const all = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const featured = all.filter((p) => p.data.featured).slice(0, 3);
+const featuredIds = new Set(featured.map((p) => p.id));
+const latest = all.filter((p) => !featuredIds.has(p.id)).slice(0, 6);
+
+const catMap = new Map<string, number>();
+for (const p of all) catMap.set(p.data.category, (catMap.get(p.data.category) ?? 0) + 1);
+const cats = [...catMap.entries()].sort((a, b) => b[1] - a[1]);
+
+const tagMap = new Map<string, number>();
+for (const p of all) for (const t of p.data.tags) tagMap.set(t, (tagMap.get(t) ?? 0) + 1);
+const topTags = [...tagMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
+const tagMax = Math.max(1, ...topTags.map(([, n]) => n));
+
+const seriesMap = new Map<string, number>();
+for (const p of all) if (p.data.series) seriesMap.set(p.data.series, (seriesMap.get(p.data.series) ?? 0) + 1);
+const seriesDesc: Record<string, string> = {
+  '结丹之路': '从三次筑基失败到金丹小成，失败与心得俱在。',
+  '阵法三讲': '以系统设计推演修仙阵法，聚灵、护山、周天自转。',
+};
+
+const stats = await getSiteStats();
+---
+<BaseLayout title="青野山房" description="青野山房：云深不知处，码上见真章。青野散人的修仙与码字手记。">
+  <section class="hero">
+    <div class="hero-cloudsea" aria-hidden="true">
+      <img src="/images/cloud-sea-hero.jpg" alt="" />
+    </div>
+    <div class="container">
+      <div class="hero-inner">
+        <p class="hero-kicker">青 野 散 人 · 修 仙 与 码 字 手 记</p>
+        <h1 class="hero-title">青野山房</h1>
+        <p class="hero-sub">云深不知处，码上见真章。</p>
+        <a class="btn-jade" href="/blog">入阁观卷</a>
+        <p class="hero-meta">山有木兮木有枝 · 阁藏玉简 {all.length} 卷</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-bar" role="presentation">
+    <div class="stat-item"><div class="stat-num">{stats.postCount}</div><div class="stat-label">藏卷</div></div>
+    <div class="stat-item"><div class="stat-num">{fmtChars(stats.totalChars)}</div><div class="stat-label">累计字数</div></div>
+    <div class="stat-item"><div class="stat-num">{stats.seriesCount}</div><div class="stat-label">连载系列</div></div>
+    <div class="stat-item"><div class="stat-num">{stats.tagCount}</div><div class="stat-label">符印</div></div>
+    <div class="stat-item"><div class="stat-num">{stats.daysSinceStart}</div><div class="stat-label">开阁天数</div></div>
+  </div>
+
+  {featured.length > 0 && (
+    <section class="home-section container">
+      <div class="section-head">
+        <h2 class="section-title">镇阁之宝</h2>
+        <a class="section-more" href="/blog">阅尽全阁</a>
+      </div>
+      <div class="featured-grid">
+        {featured.map((p, i) => (
+          <a class:list={['fcard', i === 0 && 'fcard-main']} href={`/blog/${p.id}/`}>
+            <span class="cat-mark">{p.data.category}</span>
+            <h3 class="fcard-title">{p.data.title}</h3>
+            <p class="fcard-desc">{p.data.description}</p>
+            <span class="fcard-meta">
+              <span>{fmtDate(p.data.pubDate)}</span>
+              {p.data.realm && <span class="realm-badge">{p.data.realm}</span>}
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="pano-banner" aria-label="千里江山图卷（墨色化处理）">
+    <img id="pano-img" src="/images/pano-ink.jpg" alt="千里江山图（局部，墨色化处理）" loading="lazy" />
+    <span class="pano-caption">千里江山 · 王希孟 · 墨色</span>
+  </section>
+
+  <section class="home-section container">
+    <div class="section-head">
+      <h2 class="section-title">连载系列</h2>
+      <a class="section-more" href="/series">系列总目</a>
+    </div>
+    <div class="series-grid">
+      {[...seriesMap.entries()].map(([name, count]) => (
+        <a class="series-card" href={`/series/${name}/`}>
+          <div class="series-card-name">{name}</div>
+          <p class="series-card-desc">{seriesDesc[name] ?? '系列连载中。'}</p>
+          <div class="series-card-meta">共 {count} 卷</div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="home-section container">
+    <div class="section-head">
+      <h2 class="section-title">新刻玉简</h2>
+      <a class="section-more" href="/blog">全部文章</a>
+    </div>
+    <div class="post-rows">
+      {(latest.length > 0 ? latest : all.slice(0, 6)).map((p) => (
+        <div class="post-row">
+          <span class="post-row-date">{fmtDate(p.data.pubDate)}</span>
+          <div>
+            <a class="post-row-title" href={`/blog/${p.id}/`}>{p.data.title}</a>
+            <p class="post-row-desc">{p.data.description}</p>
+          </div>
+          <span class="post-row-tags">
+            {p.data.tags.slice(0, 2).map((t) => <a class="tag-chip" href={`/tags/${t}/`}>{t}</a>)}
+          </span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="home-section container">
+    <div class="section-head">
+      <h2 class="section-title">热门符印</h2>
+      <a class="section-more" href="/tags">符印总目</a>
+    </div>
+    <div class="mini-tag-cloud">
+      {topTags.map(([name, count]) => (
+        <a href={`/tags/${name}/`} style={`font-size: ${(0.95 + (count / tagMax) * 0.9).toFixed(2)}rem;`}>
+          {name}<span class="tag-n">{count}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="home-section container">
+    <div class="section-head">
+      <h2 class="section-title">藏经分阁</h2>
+    </div>
+    <div class="cat-index">
+      {cats.map(([name, count]) => (
+        <a class="cat-tile" href={`/categories/${name}/`}>
+          <div class="cat-tile-name">{name}</div>
+          <div class="cat-tile-count">藏卷 {count} 篇</div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <script>
+    import gsap from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || document.documentElement.dataset.motion === 'off';
+    if (!reduced) {
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.fromTo('#pano-img', { x: '0%' }, {
+        x: '-12%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.pano-banner',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.6,
+        },
+      });
+    }
+  </script>
+</BaseLayout>

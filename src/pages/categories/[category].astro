@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fmtDate } from '../../lib/format';
+
+export const getStaticPaths = (async () => {
+  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  const cats = [...new Set(posts.map((p) => p.data.category))];
+  return cats.map((cat) => ({
+    params: { category: cat },
+    props: { category: cat, posts: posts.filter((p) => p.data.category === cat) },
+  }));
+}) satisfies GetStaticPaths;
+
+const { category, posts } = Astro.props;
+---
+<BaseLayout title={`分类 · ${category}`} description={`青野山房「${category}」分阁藏卷 ${posts.length} 篇。`}>
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">{category}</h1>
+      <p class="page-desc">此分阁藏卷 {posts.length} 篇。<a href="/blog">返回藏经阁总目</a></p>
+    </header>
+    <div class="post-rows">
+      {posts.map((p) => (
+        <div class="post-row">
+          <span class="post-row-date">{fmtDate(p.data.pubDate)}</span>
+          <div>
+            <a class="post-row-title" href={`/blog/${p.id}/`}>{p.data.title}</a>
+            <p class="post-row-desc">{p.data.description}</p>
+          </div>
+          <span class="post-row-tags">
+            {p.data.tags.slice(0, 2).map((t) => <a class="tag-chip" href={`/tags/${t}/`}>{t}</a>)}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

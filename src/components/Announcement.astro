@@ -1,0 +1,29 @@
+---
+import { siteConfig } from '../config';
+const ann = siteConfig.announcement;
+---
+{ann && (
+  <div class="announce" id="qy-announce" data-ann-id={ann.id} hidden>
+    <div class="announce-inner">
+      <span>{ann.text}</span>
+    </div>
+    <button class="announce-close" id="qy-announce-close" aria-label="关闭公告">关闭</button>
+  </div>
+)}
+
+{ann && (
+  <script>
+    const bar = document.getElementById('qy-announce');
+    const btn = document.getElementById('qy-announce-close');
+    if (bar && btn) {
+      const id = bar.getAttribute('data-ann-id') || '';
+      let closed = '';
+      try { closed = localStorage.getItem('qy_announce_closed') || ''; } catch (e) {}
+      if (closed !== id) bar.hidden = false;
+      btn.addEventListener('click', () => {
+        bar.hidden = true;
+        try { localStorage.setItem('qy_announce_closed', id); } catch (e) {}
+      });
+    }
+  </script>
+)}

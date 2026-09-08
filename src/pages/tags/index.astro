@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const tagMap = new Map<string, number>();
+for (const p of posts) for (const t of p.data.tags) tagMap.set(t, (tagMap.get(t) ?? 0) + 1);
+const tags = [...tagMap.entries()].sort((a, b) => b[1] - a[1]);
+const max = Math.max(1, ...tags.map(([, n]) => n));
+---
+<BaseLayout title="标签" description="青野山房标签云：以符印分检阁中玉简。">
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">符印索引</h1>
+      <p class="page-desc">每枚符印对应一类机缘，字愈大者，相关书卷愈多。</p>
+    </header>
+    <div class="tag-cloud">
+      {tags.map(([name, count]) => (
+        <a href={`/tags/${name}/`} style={`font-size: ${(1 + (count / max) * 1.2).toFixed(2)}rem;`}>
+          {name}<span class="tag-n">{count}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

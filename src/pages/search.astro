@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="检索" description="玉简检索：以关键词遍检青野山房阁中藏书。">
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">玉简检索</h1>
+      <p class="page-desc">报上关键词，检索法阵即刻遍检阁中藏书，标题、描述、标签、正文皆可命中。</p>
+    </header>
+
+    <div class="search-panel">
+      <div class="search-input-row">
+        <input id="search-input" class="search-input" type="search" placeholder="输入关键词，如：修仙、Astro、渡劫" aria-label="搜索关键词" autocomplete="off" />
+      </div>
+      <p class="search-state" id="search-state">法阵待命中，输入关键词开始检索。</p>
+      <div class="search-results" id="search-results" hidden></div>
+    </div>
+  </div>
+
+  <script>
+    import Fuse from 'fuse.js';
+
+    const input = document.getElementById('search-input') as HTMLInputElement | null;
+    const stateEl = document.getElementById('search-state');
+    const resultsEl = document.getElementById('search-results');
+
+    let fuse: Fuse<any> | null = null;
+    let loading = false;
+    let timer: number | undefined;
+
+    function setState(text: string, isError = false) {
+      if (!stateEl) return;
+      stateEl.textContent = text;
+      stateEl.classList.toggle('is-error', isError);
+    }
+
+    function escapeHtml(s: string) {
+      return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    }
+
+    async function ensureIndex() {
+      if (fuse || loading) return;
+      loading = true;
+      setState('正在展开检索法阵，请稍候。');
+      try {
+        const res = await fetch('/search-index.json');
+        if (!res.ok) throw new Error(String(res.status));
+        const data = await res.json();
+        fuse = new Fuse(data, {
+          keys: [
+            { name: 'title', weight: 0.45 },
+            { name: 'description', weight: 0.25 },
+            { name: 'tags', weight: 0.15 },
+            { name: 'category', weight: 0.05 },
+            { name: 'excerpt', weight: 0.1 },
+          ],
+          threshold: 0.35,
+          ignoreLocation: true,
+          includeScore: true,
+        });
+        setState('法阵就绪，输入关键词开始检索。');
+      } catch {
+        setState('法阵展开失败，索引未能载入。请刷新重试。', true);
+      } finally {
+        loading = false;
+      }
+    }
+
+    function runSearch() {
+      if (!input || !resultsEl) return;
+      const q = input.value.trim();
+      if (!q) {
+        resultsEl.hidden = true;
+        resultsEl.innerHTML = '';
+        setState(fuse ? '法阵就绪，输入关键词开始检索。' : '法阵待命中，输入关键词开始检索。');
+        return;
+      }
+      if (!fuse) { ensureIndex().then(runSearch); return; }
+      const hits = fuse.search(q).slice(0, 20);
+      if (hits.length === 0) {
+        resultsEl.hidden = true;
+        resultsEl.innerHTML = '';
+        setState(`遍检全阁，未见与「${q}」相关的玉简。`);
+        return;
+      }
+      setState(`检得 ${hits.length} 卷相关玉简。`);
+      resultsEl.hidden = false;
+      resultsEl.innerHTML = hits.map(({ item }) => `
+        <div class="search-hit">
+          <h3><a href="${item.url}">${escapeHtml(item.title)}</a></h3>
+          <div class="hit-meta">
+            <span>${escapeHtml(item.category)}</span>
+            <span>${escapeHtml(item.date)}</span>
+            ${(item.tags || []).map((t: string) => `<span>#${escapeHtml(t)}</span>`).join('')}
+          </div>
+          <p class="hit-desc">${escapeHtml(item.description)}</p>
+        </div>
+      `).join('');
+    }
+
+    input?.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(runSearch, 220);
+    });
+    input?.addEventListener('focus', ensureIndex, { once: true });
+    if (new URLSearchParams(location.search).get('focus') === '1') {
+      input?.focus();
+    }
+  </script>
+</BaseLayout>

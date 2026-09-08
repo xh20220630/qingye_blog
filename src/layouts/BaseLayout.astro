@@ -1,0 +1,77 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ImmortalMist from '../components/ImmortalMist.astro';
+import Announcement from '../components/Announcement.astro';
+import FloatTools from '../components/FloatTools.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  ogTitle?: string;
+  ogType?: string;
+  ogImage?: string;
+  jsonld?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description,
+  ogTitle,
+  ogType = 'website',
+  ogImage = '/images/cloud-sea-hero.jpg',
+  jsonld,
+} = Astro.props;
+
+const site = '青野山房';
+const fullTitle = title === site ? `${site} · 云深不知处，码上见真章` : `${title} · ${site}`;
+const origin = Astro.site ?? Astro.url.origin;
+const canonical = new URL(Astro.url.pathname, origin).href;
+const ogImageUrl = new URL(ogImage, origin).href;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#faf8f3" />
+    <meta property="og:site_name" content={site} />
+    <meta property="og:title" content={ogTitle ?? fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle ?? fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <link rel="alternate" type="application/rss+xml" title="青野山房 RSS" href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23b3452e'/%3E%3Ctext x='16' y='23' font-size='18' text-anchor='middle' fill='%23f7f1e8' font-family='KaiTi,serif'%3E青%3C/text%3E%3C/svg%3E" />
+    <script is:inline>
+      (function () {
+        try {
+          var fs = localStorage.getItem('qy_font_size');
+          if (fs === 's' || fs === 'm' || fs === 'l') document.documentElement.dataset.font = fs;
+          if (localStorage.getItem('qy_motion') === 'off') document.documentElement.dataset.motion = 'off';
+        } catch (e) {}
+      })();
+    </script>
+    {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
+  </head>
+  <body>
+    <ImmortalMist />
+    <Announcement />
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+    <FloatTools />
+  </body>
+</html>

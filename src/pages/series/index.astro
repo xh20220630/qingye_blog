@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const seriesMap = new Map<string, typeof posts>();
+for (const p of posts) {
+  if (!p.data.series) continue;
+  if (!seriesMap.has(p.data.series)) seriesMap.set(p.data.series, []);
+  seriesMap.get(p.data.series)!.push(p);
+}
+const seriesDesc: Record<string, string> = {
+  '结丹之路': '从三次筑基失败到金丹小成：一条真实的结丹之路，失败与心得俱在。',
+  '阵法三讲': '以系统设计推演修仙阵法：聚灵、护山、周天自转，三讲成一套。',
+};
+const seriesList = [...seriesMap.entries()].map(([name, list]) => ({
+  name,
+  count: list.length,
+  first: list.map((p) => p.data.pubDate.valueOf()).sort((a, b) => a - b)[0],
+  desc: seriesDesc[name] ?? '系列连载中。',
+}));
+---
+<BaseLayout title="连载系列" description="青野山房连载系列：成套的功法讲义，按卷序循序参修。">
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">连载系列</h1>
+      <p class="page-desc">成套的功法讲义，按卷序循序参修，胜过东鳞西爪。</p>
+    </header>
+    <div class="series-grid">
+      {seriesList.map((s) => (
+        <a class="series-card" href={`/series/${s.name}/`}>
+          <div class="series-card-name">{s.name}</div>
+          <p class="series-card-desc">{s.desc}</p>
+          <div class="series-card-meta">共 {s.count} 卷</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
