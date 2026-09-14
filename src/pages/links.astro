@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { friendLinks } from '../config';
+---
+<BaseLayout title="友邻仙山" description="洞天福地，友邻仙山：与青野山房往来唱和的各座山头。">
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">洞天福地 · 友邻仙山</h1>
+      <p class="page-desc">修仙不靠闭门造车，码字亦然。以下各座山头与山房往来唱和，道友不妨逐一登门拜访。</p>
+    </header>
+    <div class="link-grid">
+      {friendLinks.map((l) => (
+        <a class="link-card" href={l.url} target="_blank" rel="noopener noreferrer">
+          <div class="link-card-name">{l.name}</div>
+          <p class="link-card-desc">{l.desc}</p>
+          <div class="link-card-url">{l.url.replace(/^https?:\/\//, '')}</div>
+        </a>
+      ))}
+    </div>
+    {friendLinks.length === 0 && <div class="community-panel community-empty"><b>山径待相逢。</b>尚未收录友邻。若你也有一座用心经营的小站，欢迎留下山门地址。</div>}
+    <p class="page-desc" style="margin-top: 2.5rem;">若道友亦有仙山愿与山房结为友邻，可于<a href="/guestbook">留言板</a>留下山门名号与来意。</p>
+  </div>
+</BaseLayout>

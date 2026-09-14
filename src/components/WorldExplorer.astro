@@ -1,0 +1,79 @@
+---
+import { isPublished } from '../lib/publishing';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RealmMark from './RealmMark.astro';
+import { locations } from '../world/locations';
+import { fmtDate } from '../lib/format';
+
+const posts = (await getCollection('blog', isPublished)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const series = [...new Set(posts.map(p => p.data.series).filter(Boolean))];
+const tags = [...new Set(posts.flatMap(p => p.data.tags))];
+---
+<BaseLayout title="青野山房" description="一方可以漫游的云上洞天。御风寻山，在藏经阁读卷，在修行台问道，于云海之间偶遇文字与灵感。">
+  <section class="world-ui" id="world-ui" aria-label="青野洞天探索" data-state="overview">
+    <header class="world-header">
+      <a class="world-brand" href="/" aria-label="青野洞天首页"><RealmMark /><span>青野<span class="brand-divider">·</span>洞天<small>QINGYE · A WORLD BEYOND</small></span></a>
+      <div class="world-header-rule"></div><span class="world-chapter">山海无界 · 心之所往</span>
+      <div class="world-header-actions">
+        <a class="world-search" href="/shelf" data-scroll-link aria-label="袖囊收藏"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4Z"/><path d="M9 7h6"/></svg><span>袖囊</span></a>
+        <a class="world-search" href="/search" data-scroll-link aria-label="寻卷搜索"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><span>寻卷</span></a>
+        <button class="world-setting-trigger" id="world-setting-trigger" aria-expanded="false" aria-controls="world-settings" aria-label="天地设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3"/></svg></button>
+      </div>
+    </header>
+    <div class="world-intro">
+      <p class="world-overline"><span></span> 第 一 重 天 · 青 野 境</p>
+      <h1>天地之间<span>自在<span class="title-accent">逍遥</span></span></h1>
+      <p class="world-poem">无需赶路，山海自会相逢。<br />循一缕云，赴一场有字的修行。</p>
+      <button class="world-enter" data-travel="library"><span class="enter-orbit" aria-hidden="true">↗</span><span>御风入境<small>从藏经阁开始</small></span><i aria-hidden="true"></i></button>
+    </div>
+    <div class="world-location-pins" aria-label="云上地点">
+      {locations.map((place, i) => <button class="world-pin" data-pin={place.id} data-travel={place.id} style={`--pin-x:${[33, 53, 75, 72, 45, 22][i]}%;--pin-y:${[45, 24, 43, 67, 68, 63][i]}%;`} aria-label={`探索${place.name}`}><span class="pin-label">{place.name}<small>{place.subtitle}</small></span><span class="pin-stem"></span><span class="pin-diamond"><i></i></span></button>)}
+    </div>
+    <div class="world-weather"><span class="weather-orbit" aria-hidden="true">☼</span><span id="world-weather-name">辰时 · 云海初晴</span><i></i><span>宜 · 问道</span></div>
+    <div class="world-discovery"><span class="discovery-mark" aria-hidden="true">◇</span><span>洞天足迹 <b id="world-visited">00</b><i>/ 06</i></span><span class="discovery-line"></span><span id="world-status" role="status" aria-live="polite">云境正在苏醒…</span></div>
+    <aside class="place-sheet" id="place-sheet" aria-label="地点详情" hidden>
+      <button class="place-close" id="place-close" aria-label="返回洞天全景">↙ <span>回望全境</span></button>
+      {locations.map((place, i) => <section class="place-content" data-place={place.id} hidden aria-labelledby={`place-title-${place.id}`}>
+        <div class="place-coordinate"><span>0{i + 1}</span><i></i>{place.coordinate}</div>
+        <div class="place-heading"><span class="place-seal" aria-hidden="true">{place.glyph}</span><div><p>{place.subtitle}</p><h2 id={`place-title-${place.id}`} tabindex="-1">{place.name}</h2></div></div>
+        <p class="place-description">{place.detail}</p>
+        <button class="place-inspect" data-inspect={place.id}><span aria-hidden="true">⤢</span>{place.id === 'ferry' ? '近观仙鹤' : '临境细观'}<small>走近些，看见细微</small></button>
+        {place.id === 'library' && <div class="place-scrolls"><span class="place-list-label">新刻玉简 · 阁藏 {posts.length} 卷</span>{posts.slice(0, 3).map((p, n) => <a href={`/blog/${p.id}/`} data-scroll-link><span>0{n + 1}</span><div><h3>{p.data.title}</h3><small>{p.data.category} · {fmtDate(p.data.pubDate)}</small></div><b aria-hidden="true">↗</b></a>)}</div>}
+        {place.id === 'practice' && <div class="place-scrolls"><span class="place-list-label">循序参修</span>{series.map((name, n) => <a href={`/series/${name}/`} data-scroll-link><span>0{n + 1}</span><div><h3>{name}</h3><small>{posts.filter(p => p.data.series === name).length} 卷连载 · 入门至进阶</small></div><b aria-hidden="true">↗</b></a>)}</div>}
+        {place.id === 'stars' && <div class="place-symbols">{tags.slice(0, 10).map(t => <a href={`/tags/${t}/`} data-scroll-link>{t}</a>)}</div>}
+        {place.id === 'chronicle' && <div class="place-time"><span>{posts.length}</span><div>次落笔<br /><small>每一卷，都是来过的证明</small></div></div>}
+        {place.id === 'hermit' && <blockquote class="place-quote">“把白天渡不过的劫，<br />写成阁中一卷卷玉简。”<cite>— 青野散人</cite></blockquote>}
+        {place.id === 'ferry' && <div class="place-scrolls"><a href="/links" data-scroll-link><span>鹤</span><div><h3>友邻仙山</h3><small>循着鹤影，拜访同道</small></div><b aria-hidden="true">↗</b></a><a href="/subscribe" data-scroll-link><span>信</span><div><h3>订阅山讯</h3><small>山中有新卷，飞书自来</small></div><b aria-hidden="true">↗</b></a></div>}
+        <a class="place-action" href={place.href} data-scroll-link>{place.action}<span aria-hidden="true">⟶</span></a>
+      </section>)}
+    </aside>
+    <div class="world-inspection" id="world-inspection" hidden>
+      <span class="inspection-name" id="inspection-name"></span><span class="inspection-hint">拖动环看 · 滚轮远近</span>
+      <button id="inspection-back">↙ 返回仙山</button>
+    </div>
+    <div class="world-settings" id="world-settings" hidden>
+      <p class="settings-heading">一方天地，自在随心</p>
+      <fieldset><legend>天色</legend><div class="world-segment">{[['dawn','辰光'],['sunset','霞照'],['night','月华']].map(([value,label]) => <button data-sky={value} aria-pressed={value === 'dawn'}>{label}</button>)}</div></fieldset>
+      <fieldset><legend>景致</legend><div class="world-segment">{[['auto','随境'],['high','精致'],['low','流畅']].map(([value,label]) => <button data-quality={value} aria-pressed={value === 'auto'}>{label}</button>)}</div></fieldset>
+      <fieldset><legend>云海流动</legend><div class="world-segment">{[['calm','轻岚'],['breeze','流云'],['strong','奔涌']].map(([value,label]) => <button data-wind={value} aria-pressed={value === 'breeze'}>{label}</button>)}</div></fieldset>
+      <button class="world-still" id="world-still" aria-pressed="false"><span>入定 · 暂停天地流转</span><i></i></button>
+      <p class="settings-hint">拖动环顾 · 滚轮远近<br />方向键环顾 · + / − 远近 · Esc 返回</p>
+      <a class="settings-text-link" href="/blog">直接阅卷 ↗</a>
+      <a class="settings-text-link" href="/subscribe" data-scroll-link>订阅山讯 ↗</a>
+      <a class="settings-text-link" href="/account" data-scroll-link>道友身份 ↗</a>
+    </div>
+    <footer class="world-bottom">
+      <button class="world-compass" id="world-overview" aria-label="返回洞天全景"><svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><circle cx="40" cy="40" r="32" stroke="currentColor" stroke-width=".7"/><circle cx="40" cy="40" r="25" stroke="currentColor" stroke-width=".5" stroke-dasharray="1 5"/><path d="M40 8v8m0 48v8M8 40h8m48 0h8M40 25l5 15-5 15-5-15Z" stroke="currentColor"/><path d="m40 25 5 15h-5z" fill="currentColor"/></svg><span>回望全境</span></button>
+      <nav class="world-destinations" aria-label="洞天图录">{locations.map((place, i) => <button data-travel={place.id} data-destination={place.id} aria-pressed="false"><span class="destination-index">0{i+1}</span><span class="destination-glyph">{place.glyph}</span><span class="destination-name">{place.name}</span><i></i></button>)}</nav>
+      <div class="world-gesture"><svg viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><rect x="4" y="2" width="16" height="25" rx="8"/><path d="M12 7v7m-4-3 4-4 4 4"/></svg><span>拖动，环顾天地<small>滚轮或双指，御风远近</small></span></div>
+    </footer>
+    <noscript><div class="world-noscript">静观云海，亦可阅卷。<a href="/blog">藏经阁</a><a href="/series">修行录</a><a href="/archive">岁月志</a><a href="/tags">万象集</a><a href="/about">山房主人</a><a href="/guestbook">山前留音</a></div></noscript>
+  </section>
+  <dialog class="world-reader" id="world-reader" aria-labelledby="reader-title">
+    <div class="reader-bar"><span class="reader-emblem" aria-hidden="true">卷</span><span id="reader-title">云上阅卷</span><span class="reader-bar-rule"></span><a id="reader-external" href="/blog" target="_blank" rel="noopener" aria-label="在新标签页打开当前书卷">独览 ↗</a><button id="reader-close" aria-label="收卷，返回洞天">收卷 <span aria-hidden="true">×</span></button></div>
+    <div class="reader-loading" id="reader-loading" role="status">玉简徐徐展开…</div>
+    <iframe id="world-reader-frame" title="云上阅卷内容"></iframe>
+  </dialog>
+  <script>import '../world/interface.js';</script>
+</BaseLayout>

@@ -1,0 +1,42 @@
+---
+import { isPublished } from '../../lib/publishing';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fmtDate } from '../../lib/format';
+
+export const getStaticPaths = (async () => {
+  const posts = (await getCollection('blog', isPublished))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { tag, posts: posts.filter((p) => p.data.tags.includes(tag)) },
+  }));
+}) satisfies GetStaticPaths;
+
+const { tag, posts } = Astro.props;
+---
+<BaseLayout title={`标签 · ${tag}`} description={`青野山房符印「${tag}」所系书卷 ${posts.length} 篇。`}>
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">符印 · {tag}</h1>
+      <p class="page-desc">此印所系书卷 {posts.length} 篇。<a href="/tags">返回符印总目</a></p>
+      <a class="community-button secondary" href={`/feeds/tag/${tag}.xml`}>订阅此标签 ↗</a>
+    </header>
+    <div class="post-rows">
+      {posts.map((p) => (
+        <div class="post-row">
+          <span class="post-row-date">{fmtDate(p.data.pubDate)}</span>
+          <div>
+            <a class="post-row-title" href={`/blog/${p.id}/`}>{p.data.title}</a>
+            <p class="post-row-desc">{p.data.description}</p>
+          </div>
+          <span class="post-row-tags">
+            <a class="tag-chip" href={`/categories/${p.data.category}/`}>{p.data.category}</a>
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

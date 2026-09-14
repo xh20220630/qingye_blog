@@ -1,0 +1,29 @@
+---
+interface Props { slug: string; title: string; }
+const { slug, title } = Astro.props;
+---
+<div class="post-actions" data-slug={slug} data-title={title}>
+  <button class="act-btn" id="qy-like" type="button" aria-pressed="false">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M5 20 a4.5 4.5 0 0 1 1.2-8.9 a6 6 0 0 1 11.6-1.4 a5 5 0 0 1 7 4.6 a3.6 3.6 0 0 1-1 7.1 z" />
+    </svg>
+    <span>随喜</span><span class="act-n" id="qy-like-n">—</span>
+  </button>
+  <button class="act-btn" id="qy-fav" type="button" aria-pressed="false">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="8" y="4" width="16" height="24" rx="2" />
+      <path d="M13 4 v8 l3-2.4 L19 12 V4" />
+    </svg>
+    <span id="qy-fav-label">收进袖囊</span>
+  </button>
+  <button class="act-btn" id="qy-share" type="button">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <circle cx="9" cy="16" r="3" /><circle cx="23" cy="8" r="3" /><circle cx="23" cy="24" r="3" />
+      <path d="M11.8 14.5 L20.2 9.6 M11.8 17.5 L20.2 22.4" />
+    </svg>
+    <span id="qy-share-label">传讯</span>
+  </button>
+</div>
+
+<p class="post-service-status" id="post-service-status" role="status" aria-live="polite"></p>
+<script>import '../community/reading.js';</script>

@@ -1,0 +1,337 @@
+---
+import { isPublished } from '../../lib/publishing';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostActions from '../../components/PostActions.astro';
+import Comments from '../../components/Comments.astro';
+import { fmtDate, readingTime } from '../../lib/format';
+
+export const getStaticPaths = (async () => {
+  const posts = (await getCollection('blog', isPublished))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  return posts.map((post, i) => {
+    // 系列内导航：按 pubDate 正序编号
+    let seriesNav = null as null | {
+      name: string; index: number; total: number;
+      prev: { id: string; title: string } | null;
+      next: { id: string; title: string } | null;
+    };
+    if (post.data.series) {
+      const inSeries = posts
+        .filter((p) => p.data.series === post.data.series)
+        .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+      const idx = inSeries.findIndex((p) => p.id === post.id);
+      const sp = inSeries[idx - 1];
+      const sn = inSeries[idx + 1];
+      seriesNav = {
+        name: post.data.series,
+        index: idx + 1,
+        total: inSeries.length,
+        prev: sp ? { id: sp.id, title: sp.data.title } : null,
+        next: sn ? { id: sn.id, title: sn.data.title } : null,
+      };
+    }
+    return {
+      params: { slug: post.id },
+      props: {
+        post,
+        prev: posts[i + 1] ?? null,
+        next: posts[i - 1] ?? null,
+        related: posts
+          .filter((p) => p.id !== post.id)
+          .map((p) => ({ post: p, score: p.data.tags.filter(t => post.data.tags.includes(t)).length * 3 + Number(p.data.category === post.data.category) + (post.data.series && p.data.series === post.data.series ? 4 : 0) }))
+          .filter(p => p.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .map(p => p.post)
+          .slice(0, 3),
+        seriesNav,
+      },
+    };
+  });
+}) satisfies GetStaticPaths;
+
+const { post, prev, next, related, seriesNav } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const minutes = readingTime(post.body);
+const postUrl = new URL(`/blog/${post.id}/`, Astro.site ?? Astro.url.origin).href;
+
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  ...(post.data.updatedDate ? { dateModified: post.data.updatedDate.toISOString() } : {}),
+  author: { '@type': 'Person', name: post.data.author },
+  keywords: post.data.tags.join(', '),
+  inLanguage: 'zh-CN',
+};
+---
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogTitle={post.data.title}
+  ogType="article"
+  jsonld={jsonld}
+>
+  <div class="juan-progress" id="juan-progress"></div>
+
+  <div class="container juan-layout">
+    <article>
+      <nav class="breadcrumb" aria-label="面包屑">
+        <a href="/">首页</a>
+        <span class="crumb-sep">/</span>
+        <a href="/blog">文章</a>
+        <span class="crumb-sep">/</span>
+        <a href={`/categories/${post.data.category}/`}>{post.data.category}</a>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-cur">{post.data.title}</span>
+      </nav>
+
+      <header class="juan-head">
+        <div class="juan-head-row">
+          <div class="seal" aria-hidden="true">青野</div>
+          <div>
+            <span class="cat-mark">{post.data.category}</span>
+            <h1 class="juan-title">{post.data.title}</h1>
+          </div>
+        </div>
+        <div class="juan-meta">
+          <span>刊于 {fmtDate(post.data.pubDate)}</span>
+          {post.data.updatedDate && <span>修于 {fmtDate(post.data.updatedDate)}</span>}
+          <span>约 {minutes} 分钟可读</span>
+          <span>{post.data.author} 撰</span>
+          <span id="post-views"></span>
+          {post.data.realm && <span class="realm-badge">境界 · {post.data.realm}</span>}
+        </div>
+        {post.data.tags.length > 0 && (
+          <div class="juan-tags">
+            {post.data.tags.map((t) => <a class="tag-chip" href={`/tags/${t}/`}>{t}</a>)}
+          </div>
+        )}
+      </header>
+
+      {post.data.cover && <img class="article-cover" src={post.data.cover} alt={post.data.title} loading="lazy" />}
+      <div class="reading-tools"><button id="reading-focus" aria-pressed="false">静心阅读</button><button id="reading-width" aria-pressed="false">舒展卷面</button><button id="reading-print">打印 / 保存 PDF</button><a href="#comments">留音 ↓</a></div>
+      <div class="reading-resume" id="reading-resume" hidden><span id="resume-label"></span><div><button id="resume-reading">接着读 →</button><button id="dismiss-resume" aria-label="关闭续读提示">×</button></div></div>
+      {toc.length > 0 && <details class="mobile-toc"><summary>展开卷目 · {toc.length} 节</summary><ul>{toc.map(h => <li class={`depth-${h.depth}`}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ul></details>}
+
+      <div class="scroll-rod" aria-hidden="true"></div>
+      <div class="scroll-paper">
+        <div class="juan-body" id="juan-body">
+          <Content />
+        </div>
+      </div>
+      <div class="scroll-rod" aria-hidden="true"></div>
+
+      <PostActions slug={post.id} title={post.data.title} />
+
+      <div class="copyright-box">
+        <b>版权声明</b>：本文系 {post.data.author} 亲笔所撰，刊于青野山房，保留所有权利。转载请注明出处并保留本文链接。
+        <br />本文链接：<a href={postUrl}>{postUrl}</a>
+      </div>
+
+      {seriesNav && (
+        <div class="series-nav">
+          <div class="series-nav-head">
+            <a class="series-nav-name" href={`/series/${seriesNav.name}/`}>连载 · {seriesNav.name}</a>
+            <span class="series-nav-idx">第 {seriesNav.index} 卷 / 共 {seriesNav.total} 卷</span>
+          </div>
+          <div class="series-nav-links">
+            {seriesNav.prev ? (
+              <a href={`/blog/${seriesNav.prev.id}/`}>
+                <span class="sn-label">系列上一卷</span>{seriesNav.prev.title}
+              </a>
+            ) : <span></span>}
+            {seriesNav.next ? (
+              <a class="sn-next" href={`/blog/${seriesNav.next.id}/`}>
+                <span class="sn-label">系列下一卷</span>{seriesNav.next.title}
+              </a>
+            ) : <span></span>}
+          </div>
+        </div>
+      )}
+
+      <div class="juan-tail">
+        {(prev || next) && (
+          <nav class="pn-nav" aria-label="上下篇">
+            {prev ? (
+              <a class="pn-item" href={`/blog/${prev.id}/`} id="qy-prev-link">
+                <span class="pn-label">上一卷</span>
+                <div class="pn-title">{prev.data.title}</div>
+              </a>
+            ) : <span></span>}
+            {next && (
+              <a class="pn-item pn-next" href={`/blog/${next.id}/`} id="qy-next-link">
+                <span class="pn-label">下一卷</span>
+                <div class="pn-title">{next.data.title}</div>
+              </a>
+            )}
+          </nav>
+        )}
+
+        {related.length > 0 && (
+          <section style="margin-top: 2.5rem;">
+            <div class="section-head" style="margin-bottom: 0;">
+              <h2 class="section-title" style="font-size: 1.3rem;">同契之卷</h2>
+            </div>
+            <div class="related-list">
+              {related.map((p) => (
+                <a class="related-item" href={`/blog/${p.id}/`}>
+                  <h5>{p.data.title}</h5>
+                  <p>{p.data.description}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+      {post.data.commentsEnabled && <Comments thread={post.id} />}
+    </article>
+
+    {toc.length > 0 && (
+      <aside class="juan-toc" aria-label="目录">
+        <h4>卷 目</h4>
+        <ul id="toc-list">
+          {toc.map((h) => (
+            <li>
+              <a href={`#${h.slug}`} class:list={[h.depth === 3 && 'toc-h3']} data-slug={h.slug}>{h.text}</a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+  </div>
+
+  <dialog class="lightbox-native" id="qy-lightbox" aria-label="图片放大预览">
+    <button id="close-lightbox" aria-label="关闭图片预览">收起 ×</button>
+    <img id="qy-lightbox-img" alt="放大预览" />
+  </dialog>
+
+  <script>
+    /* TOC 当前章节高亮（IntersectionObserver） */
+    const links = document.querySelectorAll('#toc-list a');
+    if (links.length > 0) {
+      const map = new Map();
+      links.forEach((a) => map.set(a.getAttribute('data-slug'), a));
+      const heads = document.querySelectorAll('.juan-body h2[id], .juan-body h3[id]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            links.forEach((a) => a.classList.remove('is-active'));
+            map.get(entry.target.id)?.classList.add('is-active');
+          }
+        });
+      }, { rootMargin: '-15% 0px -70% 0px' });
+      heads.forEach((h) => io.observe(h));
+    }
+
+    /* 灯箱：文中图片点击放大，ESC 关闭；打开时禁用翻页快捷键 */
+    const lightbox = document.getElementById('qy-lightbox') as HTMLDialogElement | null;
+    const lightboxImg = document.getElementById('qy-lightbox-img') as HTMLImageElement | null;
+    function openLightbox(src: string, alt: string) {
+      if (!lightbox || !lightboxImg) return;
+      lightboxImg.src = src;
+      lightboxImg.alt = alt;
+      lightbox.showModal();
+    }
+    function closeLightbox() {
+      lightbox?.close();
+    }
+    document.querySelectorAll('.juan-body img, .article-cover').forEach((img) => {
+      const image = img as HTMLImageElement;
+      image.tabIndex = 0;
+      image.classList.add('lightbox-image-trigger');
+      image.setAttribute('role', 'button');
+      image.setAttribute('aria-label', `放大图片：${image.alt}`);
+      image.addEventListener('click', () => openLightbox(image.currentSrc || image.src, image.alt));
+      image.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openLightbox(image.currentSrc || image.src, image.alt); } });
+    });
+    lightbox?.addEventListener('click', closeLightbox);
+    lightbox?.addEventListener('keydown', event => { if (event.key === 'Escape') event.stopPropagation(); });
+
+    document.querySelector('#reading-print')?.addEventListener('click', () => window.print());
+    document.querySelector('#reading-focus')?.addEventListener('click', event => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const on = button.getAttribute('aria-pressed') !== 'true';
+      document.body.dataset.reading = on ? 'focus' : '';
+      document.dispatchEvent(new CustomEvent('realm:reader', { detail: on }));
+      button.setAttribute('aria-pressed', String(on));
+      button.textContent = on ? '返回寻常阅读' : '静心阅读';
+    });
+    document.querySelector('#reading-width')?.addEventListener('click', event => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const on = button.getAttribute('aria-pressed') !== 'true';
+      document.documentElement.dataset.readingWidth = on ? 'wide' : '';
+      button.setAttribute('aria-pressed', String(on));
+    });
+    document.querySelectorAll('.juan-body h2[id], .juan-body h3[id]').forEach(heading => {
+      const link = document.createElement('a'); link.className = 'heading-anchor'; link.href = `#${heading.id}`; link.textContent = '#'; link.setAttribute('aria-label', `跳转至${heading.textContent}`); heading.append(link);
+    });
+
+    /* 代码块复制按钮 */
+    document.querySelectorAll('.juan-body pre').forEach((pre) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'code-wrap';
+      pre.parentNode?.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'code-copy';
+      btn.textContent = '录下';
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(pre.textContent || '');
+          btn.textContent = '已录';
+          btn.classList.add('is-done');
+        } catch {
+          btn.textContent = '录败';
+        }
+        setTimeout(() => { btn.textContent = '录下'; btn.classList.remove('is-done'); }, 1500);
+      });
+      wrap.appendChild(btn);
+    });
+
+    /* 键盘快捷键：← 上一篇，→ 下一篇，/ 去检索 */
+    document.addEventListener('keydown', (e) => {
+      if (lightbox?.open) {
+        if (e.key === 'Escape') closeLightbox();
+        return;
+      }
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'ArrowLeft') {
+        const a = document.getElementById('qy-prev-link') as HTMLAnchorElement | null;
+        if (a) location.href = a.href;
+      } else if (e.key === 'ArrowRight') {
+        const a = document.getElementById('qy-next-link') as HTMLAnchorElement | null;
+        if (a) location.href = a.href;
+      } else if (e.key === '/') {
+        e.preventDefault();
+        location.href = '/search?focus=1';
+      }
+    });
+
+    const progress = document.getElementById('juan-progress');
+    const body = document.getElementById('juan-body');
+    let progressFrame = 0;
+    function updateProgress() {
+      if (progressFrame) return;
+      progressFrame = requestAnimationFrame(() => {
+        if (body && progress) {
+          const rect = body.getBoundingClientRect();
+          const range = Math.max(1, rect.height - window.innerHeight * .3);
+          const ratio = Math.max(0, Math.min(1, (window.innerHeight * .7 - rect.top) / range));
+          progress.style.transform = `scaleX(${ratio})`;
+        }
+        progressFrame = 0;
+      });
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+    updateProgress();
+  </script>
+</BaseLayout>

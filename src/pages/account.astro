@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="道友身份" description="拥有自己的袖囊，在不同设备间收藏文章、接续阅读。" noindex>
+  <div class="container"><header class="page-head"><h1 class="page-title">道友身份</h1><p class="page-desc">山海之间，留一处属于你的印记。</p></header>
+    <div class="account-layout"><aside class="account-aside"><span class="community-kicker">A PLACE TO RETURN TO</span><h2>每一次归来，<br />接着上次的故事。</h2><p>不必登录，也可以自在阅卷。<br />留下一个身份，山房便替你记住走过的路。</p><ol><li>把喜欢的文章收进袖囊</li><li>跨设备接续阅读进度</li><li>用自己的称呼参与对话</li></ol></aside>
+      <section class="community-panel" id="account-panel"><p class="community-status">正在确认身份…</p></section>
+    </div>
+  </div>
+  <script>import '../community/account.js';</script>
+</BaseLayout>

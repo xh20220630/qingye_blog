@@ -1,0 +1,20 @@
+<div class="realm-scene" id="immortal-mist">
+  <picture class="realm-landscape" aria-hidden="true">
+    <source media="(max-width: 700px)" srcset="/images/xianxia/realm-mobile.webp" />
+    <img src="/images/xianxia/realm.webp" alt="" width="1672" height="941" fetchpriority="high" decoding="async" />
+  </picture>
+  <div class="realm-shade" aria-hidden="true"></div>
+</div>
+<script>
+  if (window.self === window.top) {
+    const container = document.getElementById('immortal-mist');
+    if (container) {
+      import('../world/world.js')
+        .then(({ createWorld }) => createWorld(container))
+        .catch((error) => {
+          console.error('The realm renderer could not start.', error);
+          document.dispatchEvent(new CustomEvent('realm:fallback'));
+        });
+    }
+  }
+</script>

@@ -1,0 +1,17 @@
+---
+interface Props { thread: string; }
+const { thread } = Astro.props;
+---
+<section class="comment-section community-panel" id="comments" data-thread={thread}>
+  <header><span class="community-kicker">A VOICE ACROSS THE MOUNTAINS</span><h2>留一缕回音</h2><p class="community-muted">有感而发，相逢即是同道。留言审核通过后公开。</p></header>
+  <form class="community-form" id="comment-form">
+    <div class="comment-form-head"><span id="comment-identity">以访客身份留音</span><a href="/account">登录道友身份 →</a></div>
+    <label id="comment-name-label">如何称呼<input name="name" required maxlength="60" autocomplete="nickname" placeholder="留下你的称呼" /></label>
+    <label class="comment-honeypot" aria-hidden="true">网站<input name="website" tabindex="-1" autocomplete="off" /></label>
+    <label>想说的话<textarea name="body" required minlength="2" maxlength="3000" rows="4" placeholder="写下感想，也欢迎温和地提出不同见解。"></textarea></label>
+    <div class="community-actions"><button type="submit">寄出留音 <span aria-hidden="true">↗</span></button><button type="button" id="cancel-reply" hidden>取消回复</button><span id="reply-target" class="community-muted"></span></div>
+  </form>
+  <p class="community-status" id="comment-state" role="status" aria-live="polite">正在听取山前来音…</p>
+  <div class="comment-list" id="comment-list"></div><div class="search-pagination" id="comment-pagination"></div>
+</section>
+<script>import '../community/comments.js';</script>

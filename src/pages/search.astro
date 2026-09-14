@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="检索" description="玉简检索：以关键词遍检青野山房阁中藏书。">
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">玉简检索</h1>
+      <p class="page-desc">报上关键词，检索法阵即刻遍检阁中藏书，标题、描述、标签、正文皆可命中。</p>
+    </header>
+
+    <div class="search-panel">
+      <div class="search-input-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
+        <input id="search-input" class="search-input" type="search" placeholder="输入关键词，如：修仙、Astro、渡劫" aria-label="搜索关键词" autocomplete="off" />
+      </div>
+      <div class="search-suggestions"><span>随缘寻卷</span>{['阵法', '修仙', '编程', '游记'].map((word) => <button type="button" data-query={word}>{word}</button>)}</div>
+      <div class="search-filters"><label>分类<select id="filter-category"><option>全部分类</option></select></label><label>标签<select id="filter-tag"><option>全部标签</option></select></label><label>系列<select id="filter-series"><option>全部系列</option></select></label><label>年份<select id="filter-year"><option>全部年份</option></select></label></div>
+      <div class="search-footer"><label class="community-muted">排序 <select id="filter-sort"><option value="relevance">相关优先</option><option value="newest">最新发布</option><option value="oldest">最早发布</option><option value="title">标题排序</option></select></label><button class="community-button secondary" id="clear-search">清空条件</button></div>
+      <p class="search-state" id="search-state" role="status" aria-live="polite">法阵待命中，输入关键词开始检索。</p>
+      <div class="search-results" id="search-results" hidden></div><div class="search-pagination" id="search-pagination" style="margin-top:24px"></div>
+    </div>
+  </div>
+
+  <script>import '../community/search.js';</script>
+</BaseLayout>

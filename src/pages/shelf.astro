@@ -1,0 +1,7 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="袖囊" description="收藏值得重读的文章，接着上次停下的地方继续。" noindex>
+  <div class="container"><header class="page-head"><h1 class="page-title">袖中有山河</h1><p class="page-desc">读到心动处，便收进袖囊。下次归来，故事还在。</p></header><section class="community-panel"><div class="community-tabs" role="tablist" aria-label="袖囊内容"><button role="tab" data-shelf-tab="saved" aria-selected="true">珍藏的卷</button><button role="tab" data-shelf-tab="history" aria-selected="false">走过的路</button><a href="/account" id="shelf-account">登录同步 →</a></div><p class="community-status" id="shelf-state" role="status">正在展开袖囊…</p><div id="shelf-list"></div><div class="community-actions"><a class="community-button" href="/blog">再去寻一卷 ↗</a><button class="community-button secondary" id="shelf-export">导出袖囊</button></div></section></div>
+  <script>import '../community/shelf.js';</script>
+</BaseLayout>

@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Comments from '../components/Comments.astro';
+---
+<BaseLayout title="留言板" description="青野山房留言板：道友路过，不妨留下一言半语。">
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">山前留音</h1>
+      <p class="page-desc">山房门前设一青石，道友路过，不妨留下一言半语。散人巡山时自会一一拜读。</p>
+    </header>
+
+    <Comments thread="guestbook" />
+  </div>
+</BaseLayout>

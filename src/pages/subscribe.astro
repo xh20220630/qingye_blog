@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="订阅山讯" description="通过 RSS 或 JSON Feed，在自己的阅读器中接收青野山房的新文章。">
+  <div class="container">
+    <header class="page-head"><h1 class="page-title">山中有信</h1><p class="page-desc">把山房放进阅读器，新卷便会随山风抵达。</p></header>
+    <div class="subscription-grid">
+      <section class="community-panel">
+        <span class="subscription-icon" aria-hidden="true">信</span><span class="community-kicker">LETTERS FROM THE MOUNTAINS</span>
+        <h2>订阅山房新卷</h2><p class="community-muted">无需账号，也不用留下邮箱。将 RSS 地址添加到自己的阅读器，按喜欢的节奏阅读。</p>
+        <div class="feed-address"><code data-feed="/rss.xml">/rss.xml</code><button data-copy-feed="/rss.xml" aria-label="复制 RSS 地址">复制</button></div>
+        <a class="community-button" href="/rss.xml">查看 RSS ↗</a>
+      </section>
+      <section class="community-panel">
+        <span class="subscription-icon" aria-hidden="true">卷</span><span class="community-kicker">YOUR READER, YOUR RHYTHM</span>
+        <h2>循着自己的兴趣</h2><p class="community-muted">分类、标签和连载系列也有各自的订阅地址。只关注一门术法，或从第一卷一路读下去。</p>
+        <div class="community-actions"><a class="community-button secondary" href="/categories/">按分类寻卷</a><a class="community-button secondary" href="/series/">循连载而读</a></div>
+        <p class="community-muted">使用支持 JSON Feed 的阅读器？也可以复制这个地址。</p>
+        <div class="feed-address"><code data-feed="/feed.json">/feed.json</code><button data-copy-feed="/feed.json" aria-label="复制 JSON Feed 地址">复制</button></div>
+        <a class="community-button secondary" href="/feed.json">查看 JSON Feed ↗</a>
+      </section>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll<HTMLElement>('[data-feed]').forEach(el => el.textContent = new URL(el.dataset.feed!, location.origin).href);
+    document.querySelectorAll<HTMLButtonElement>('[data-copy-feed]').forEach(button => button.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(new URL(button.dataset.copyFeed!, location.origin).href); button.textContent = '已复制'; }
+      catch { button.textContent = '请选中地址复制'; }
+    }));
+  </script>
+</BaseLayout>

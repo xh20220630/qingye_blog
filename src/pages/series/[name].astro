@@ -1,0 +1,43 @@
+---
+import { isPublished } from '../../lib/publishing';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fmtDate } from '../../lib/format';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog', isPublished);
+  const names = [...new Set(posts.map((p) => p.data.series).filter(Boolean))] as string[];
+  return names.map((name) => ({
+    params: { name },
+    props: {
+      name,
+      posts: posts
+        .filter((p) => p.data.series === name)
+        .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf()),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { name, posts } = Astro.props;
+---
+<BaseLayout title={`系列 · ${name}`} description={`连载系列「${name}」，共 ${posts.length} 卷，按卷序排列。`}>
+  <div class="container">
+    <header class="page-head">
+      <h1 class="page-title">{name}</h1>
+      <p class="page-desc">本系列共 {posts.length} 卷，按刊刻先后为卷序。<a href="/series">返回系列总目</a></p>
+      <a class="community-button secondary" href={`/feeds/series/${name}.xml`}>订阅此系列 ↗</a>
+    </header>
+    <div>
+      {posts.map((p, i) => (
+        <div class="series-item">
+          <span class="series-no">{i + 1}</span>
+          <div>
+            <a class="series-item-title" href={`/blog/${p.id}/`}>{p.data.title}</a>
+            <p class="series-item-desc">{p.data.description} · {fmtDate(p.data.pubDate)}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

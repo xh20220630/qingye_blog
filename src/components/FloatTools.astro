@@ -1,0 +1,107 @@
+<div class="float-tools">
+  <button class="float-btn is-hidden" id="qy-top-btn" aria-label="回到顶部" title="回到顶部">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M6 21 a4.5 4.5 0 0 1 1.2-8.86 a6 6 0 0 1 11.6-1.4 a5 5 0 0 1 7 4.6 a3.6 3.6 0 0 1-1 7.1" />
+      <path d="M16 25 v-8 m0 0 l-3.4 3.4 M16 17 l3.4 3.4" />
+    </svg>
+  </button>
+  <button class="float-btn" id="qy-pei-btn" aria-label="阅读设置" title="阅读设置" aria-expanded="false" aria-controls="qy-pei-panel">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="16" cy="19" r="8" />
+      <circle cx="16" cy="19" r="2.6" />
+      <path d="M16 11 V4 m-3 3.5 L16 4 l3 3.5" stroke-linecap="round" />
+    </svg>
+  </button>
+</div>
+<div class="pei-panel" id="qy-pei-panel" role="dialog" aria-label="阅读设置">
+  <h4>阅读设置</h4>
+  <div class="pei-row">
+    <span class="pei-label">正文字号</span>
+    <div class="pei-seg" id="qy-font-seg">
+      <button data-font="s">小字</button>
+      <button data-font="m">标准</button>
+      <button data-font="l">大字</button>
+    </div>
+  </div>
+  <div class="pei-row">
+    <span class="pei-label">仙雾动效</span>
+    <div class="pei-seg" id="qy-motion-seg">
+      <button data-motion="on">运转</button>
+      <button data-motion="off">静止</button>
+    </div>
+  </div>
+</div>
+<div id="qy-top-sentinel" aria-hidden="true" style="position:absolute; top:100vh; left:0; width:1px; height:1px;"></div>
+
+<script>
+  const root = document.documentElement;
+  const peiBtn = document.getElementById('qy-pei-btn');
+  const panel = document.getElementById('qy-pei-panel');
+  const topBtn = document.getElementById('qy-top-btn');
+  const sentinel = document.getElementById('qy-top-sentinel');
+
+  function setPanel(open: boolean) {
+    panel?.classList.toggle('is-open', open);
+    peiBtn?.setAttribute('aria-expanded', String(open));
+  }
+  peiBtn?.addEventListener('click', () => setPanel(!panel?.classList.contains('is-open')));
+  document.addEventListener('click', (e) => {
+    if (!panel || !peiBtn) return;
+    const t = e.target as Node;
+    if (!panel.contains(t) && !peiBtn.contains(t)) setPanel(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel?.classList.contains('is-open')) {
+      setPanel(false);
+      peiBtn?.focus();
+    }
+  });
+
+  const fontSeg = document.getElementById('qy-font-seg');
+  const fontBtns = fontSeg ? [...fontSeg.querySelectorAll('button')] : [];
+  function syncFont() {
+    const cur = root.dataset.font || 'm';
+    fontBtns.forEach((b) => {
+      const selected = b.dataset.font === cur;
+      b.classList.toggle('is-on', selected);
+      b.setAttribute('aria-pressed', String(selected));
+    });
+  }
+  fontBtns.forEach((b) => b.addEventListener('click', () => {
+    const v = (b as HTMLElement).dataset.font || 'm';
+    if (v === 'm') delete root.dataset.font; else root.dataset.font = v;
+    try { localStorage.setItem('qy_font_size', v); } catch (e) {}
+    syncFont();
+  }));
+  syncFont();
+
+  const motionSeg = document.getElementById('qy-motion-seg');
+  const motionBtns = motionSeg ? [...motionSeg.querySelectorAll('button')] : [];
+  function syncMotion() {
+    const cur = root.dataset.motion === 'off' ? 'off' : 'on';
+    motionBtns.forEach((b) => {
+      const selected = b.dataset.motion === cur;
+      b.classList.toggle('is-on', selected);
+      b.setAttribute('aria-pressed', String(selected));
+    });
+  }
+  motionBtns.forEach((b) => b.addEventListener('click', () => {
+    const v = (b as HTMLElement).dataset.motion || 'on';
+    try { localStorage.setItem('qy_motion', v); } catch (e) {}
+    if (v === 'off') root.dataset.motion = 'off'; else delete root.dataset.motion;
+    syncMotion();
+  }));
+  syncMotion();
+
+  if (topBtn && sentinel) {
+    const io = new IntersectionObserver(([entry]) => {
+      topBtn.classList.toggle('is-hidden', entry.boundingClientRect.top >= 0);
+    });
+    io.observe(sentinel);
+    topBtn.addEventListener('click', () => {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const smooth = root.dataset.motion === 'off' || reduced ? 'auto' : 'smooth';
+      window.scrollTo({ top: 0, behavior: smooth as ScrollBehavior });
+    });
+  }
+</script>
