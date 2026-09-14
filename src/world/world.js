@@ -26,7 +26,6 @@ export async function createWorld(container) {
   const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
   const gpu=debugInfo?String(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)):'';
   const softwareRenderer=/swiftshader|llvmpipe|software/i.test(gpu);
-  if(import.meta.env.DEV)container.dataset.renderer=gpu;
   const timerExtension=gl.getExtension('EXT_disjoint_timer_query_webgl2');
   let gpuQuery=null;
   const scene = new THREE.Scene();
@@ -75,7 +74,7 @@ export async function createWorld(container) {
   let frame=0, disposed=false, hidden=document.hidden, readerOpen=false, elapsed=0, previous=0, invalid=true;
   let transition=null, selected=null, inspecting=false, skyMode='dawn', quality='auto';
   let width=innerWidth,height=innerHeight,pixelRatio=1, cloudSteps=56;
-  let renderedFrames=0, sampleStart=0, slowSamples=0, autoScale=1;
+  let slowSamples=0, autoScale=1;
   let pendingFrame=false;
   const isStill=()=>motionQuery.matches||document.documentElement.dataset.motion==='off';
   const isPaused=()=>hidden||readerOpen||disposed;
@@ -141,11 +140,9 @@ export async function createWorld(container) {
     cameraChanged=controls.update()||cameraChanged;
     if(!isStill()||invalid||cameraChanged){
       models.update(elapsed);
-      const drawStart=performance.now();
       if(gpuQuery&&gl.getQueryParameter(gpuQuery,gl.QUERY_RESULT_AVAILABLE)){
         if(!gl.getParameter(timerExtension.GPU_DISJOINT_EXT)){
           const gpuMs=gl.getQueryParameter(gpuQuery,gl.QUERY_RESULT)/1e6;
-          if(import.meta.env.DEV)container.dataset.gpuMs=gpuMs.toFixed(1);
           if(quality==='auto'){
             // GPU duration excludes browser throttling when the window is occluded.
             slowSamples=gpuMs>30?slowSamples+1:0;
@@ -158,21 +155,11 @@ export async function createWorld(container) {
       if(measure){gpuQuery=gl.createQuery();gl.beginQuery(timerExtension.TIME_ELAPSED_EXT,gpuQuery);}
       atmosphere.render(elapsed);
       if(measure)gl.endQuery(timerExtension.TIME_ELAPSED_EXT);
-      if(import.meta.env.DEV){container.dataset.renderMs=(performance.now()-drawStart).toFixed(1);container.dataset.frame=String(Number(container.dataset.frame||0)+1);}
       updatePins();
       invalid=false;
       if(!container.classList.contains('is-ready')){
         container.classList.add('is-ready');
         document.dispatchEvent(new CustomEvent('realm:ready'));
-      }
-      if(quality==='auto'&&!isStill()&&interactive){
-        if(!sampleStart)sampleStart=now;
-        renderedFrames++;
-        if(now-sampleStart>2500){
-          const fps=renderedFrames*1000/(now-sampleStart);
-          if(import.meta.env.DEV)container.dataset.fps=fps.toFixed(1);
-          sampleStart=now;renderedFrames=0;
-        }
       }
     }
     if(!isStill()||transition||cameraChanged)requestFrame();
@@ -279,5 +266,4 @@ export async function createWorld(container) {
   try {atmosphere.setWind(localStorage.getItem('qy_wind')||'breeze');}catch{}
   const initial=location.hash.slice(1);
   if(locations.some(p=>p.id===initial))travel(initial,document.getElementById('world-ui')?.dataset.inspecting==='true');
-  return {dispose,travel,setSky};
 }

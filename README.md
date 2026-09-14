@@ -27,7 +27,7 @@
 - **洞天漫游**：六座浮岛、程序化楼阁与星轨仪、松树、流瀑、仙鹤；拖动环顾、滚轮/双指缩放、地点镜头过渡、键盘操作与本地足迹记录
 - **静览与阅读**：原生对话框和同源书卷视图保留搜索、目录、收藏等交互，阅卷时暂停世界渲染；支持减少动态效果、即时入定、WebGL 不可用时的静态背景与内容入口
 - **画质**：随境 / 精致 / 流畅；几何与体积云分开渲染，再按深度合成；依据 GPU 渲染耗时自适应云层采样，页面隐藏时暂停
-- **全站配置化**：站点名、介绍、域名、公告条、友链和备案号直接编辑 `src/site-settings.json`
+- **全站配置化**：站点名、介绍、域名、友链和备案号直接编辑 `src/site-settings.json`
 
 ## 快速开始
 
@@ -70,7 +70,7 @@ series: 护山大阵        # 可选：连载系列名
 
 ```
 src/
-├── components/    # 页头、页脚、公告条、卷轴组件等
+├── components/    # 页头、页脚、卷轴与洞天组件等
 ├── content/blog/  # Markdown 文章与漫游指南
 ├── community/     # 检索、账号、收藏、阅读与评论
 ├── layouts/       # BaseLayout 全站骨架
@@ -80,10 +80,9 @@ src/
 ├── site-settings.json # 直接编辑的公开站点设置
 └── config.ts      # 站点配置导出
 server/            # HTTP、SQLite、读者账号、互动与备份
-tests/             # 读者流程、接口退役、安全与持久化验证
 docs/              # README 引用的页面截图
 originals/         # 未压缩的水墨原图
-tools/             # 图片处理与素材生成脚本（Python）
+tools/             # Blender 模型生成脚本（Python）
 ```
 
 ## 技术栈
@@ -104,9 +103,9 @@ Astro · Three.js · GLSL · Node.js · SQLite · TypeScript / JavaScript · fus
 
 网页插图与静览素材位于 `public/images/xianxia/`，PNG 原稿保存在 `originals/xianxia/`。完整生成提示词、尺寸和用途见 [素材说明](public/images/xianxia/CREDITS.md)。主背景和书阁插图使用 WebP，小屏静览背景另有压缩版本；旧版透明云图保留存档，实时云海由 Three.js 渲染。
 
-留言默认使用 Node 服务，审核通过后公开；本地审核命令见运行说明。订阅通过 RSS 与 JSON Feed 提供。历史 giscus 配置接口保留，当前站点使用原生留言。
+留言使用 Node 服务，审核通过后公开；本地审核命令见运行说明。订阅通过 RSS 与 JSON Feed 提供。
 
-`npm run test:blog` 验证博客核心流程；`node tools/check_realm_models.mjs` 验证三维资源；`npm run backup` 备份数据库和媒体。具体实现范围与部署条件见文首文档。
+`npm run backup` 备份数据库和媒体。具体实现范围与部署条件见文首文档。
 
 ---
 

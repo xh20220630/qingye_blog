@@ -1,7 +1,6 @@
-import { pathToFileURL } from 'node:url';
 import { openStore, assert } from './core.mjs';
 
-export function reviewComments(store, action, ids = []) {
+function reviewComments(store, action, ids = []) {
   if (action === 'pending') return store.all("SELECT id,thread,name,body,created FROM comments WHERE status='pending' ORDER BY id");
   const status = { approve: 'approved', hide: 'hidden', spam: 'spam' }[action];
   assert(status && ids.length && ids.every(id => Number.isSafeInteger(id) && id > 0), 400, '用法: node server/comments.mjs pending | approve/hide/spam 留言编号...');
@@ -14,8 +13,6 @@ export function reviewComments(store, action, ids = []) {
     return { updated: ids.length, status };
   });
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const store = openStore();
-  try { console.log(JSON.stringify(reviewComments(store, process.argv[2], process.argv.slice(3).map(Number)), null, 2)); }
-  finally { store.db.close(); }
-}
+const store = openStore();
+try { console.log(JSON.stringify(reviewComments(store, process.argv[2], process.argv.slice(3).map(Number)), null, 2)); }
+finally { store.db.close(); }

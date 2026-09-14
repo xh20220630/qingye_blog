@@ -127,8 +127,6 @@ html[data-embedded] .page-head { padding-top: 32px !important; }
 html[data-embedded] .deco-strip { margin-top: 25px; height: 120px; opacity: .7; }
 html[data-embedded] .float-tools { right: 18px; bottom: 18px; }
 html[data-embedded] .pei-panel { right: 70px; bottom: 18px; }
-html[data-embedded] .post-wrap { padding-top: 32px; }
-html[data-embedded] .post-paper { border: 0; background: transparent; box-shadow: none; }
 @keyframes sheet-arrive { from { opacity: 0; transform: translateX(25px); } to { opacity: 1; transform: none; } }
 @keyframes scroll-unfold { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
 @media (max-width: 1150px) {
@@ -145,7 +143,7 @@ html[data-embedded] .post-paper { border: 0; background: transparent; box-shadow
   .site-home .realm-shade { background: linear-gradient(90deg,#102c3b5c,transparent 70%),linear-gradient(180deg,#173a4b1a,transparent 35%,transparent 61%,#0c273cdf); }
   .place-sheet { top: auto; bottom: 122px; left: 17px; right: 17px; width: auto; max-height: min(46svh,380px); padding: 20px 22px; }.place-close { padding-bottom: 14px !important; position: absolute; right: 24px; top: 20px; }.place-coordinate { font-size: 8px; }.place-coordinate > span { font-size: 12px; }.place-heading { margin-top: 12px; gap: 12px; }.place-seal { width: 33px; height: 39px; font-size: 23px; }.place-heading h2 { font-size: 29px; }.place-heading p { font-size: 9px; }.place-description { font-size: 11px; margin: 14px 0; line-height: 1.8; }.place-scrolls a { padding: 10px 0; }.place-scrolls a h3 { font-size: 15px; }.place-list-label { padding-bottom: 10px; font-size: 8px; }.place-action { margin-top: 13px; font-size: 12px; padding-top: 10px; }.world-ui[data-state='place'] .world-compass,.world-ui[data-state='place'] .world-discovery { display: none; }.world-ui[data-state='place'] .world-location-pins { opacity: .8; }
   .world-settings { right: 19px; top: 75px; width: 242px; }.world-reader { inset: 9px; width: calc(100vw - 18px); height: calc(100svh - 18px); }.reader-bar { min-height: 55px; padding: 10px 13px; gap: 9px; }.reader-bar > #reader-title { font-size: 13px; max-width: 42%; }.reader-bar a { font-size: 9px; }.reader-bar button { font-size: 11px; }.reader-bar button span { margin-left: 3px; font-size: 19px; }.reader-emblem { font-size: 15px; }
-  html[data-embedded] .container { width: calc(100% - 34px); }html[data-embedded] .post-wrap { padding-top: 16px; }html[data-embedded] .page-head { padding-top: 23px !important; }html[data-embedded] .deco-strip { height: 90px; }html[data-embedded] .float-tools { right: 12px; bottom: 12px; }
+  html[data-embedded] .container { width: calc(100% - 34px); }html[data-embedded] .page-head { padding-top: 23px !important; }html[data-embedded] .deco-strip { height: 90px; }html[data-embedded] .float-tools { right: 12px; bottom: 12px; }
   .world-noscript { left: 20px; right: 20px; bottom: 170px; gap: 12px; font-size: 12px; }
 }
 @media (max-height: 690px) and (min-width: 701px) { .world-header { height: 85px; }.world-intro { top: 21%; }.world-intro h1 { font-size: 45px; margin: 16px 0; }.world-enter { margin-top: 19px; }.world-bottom { bottom: 16px; }.world-discovery { bottom: 128px; }.place-sheet { top: 105px; max-height: calc(100svh - 230px); padding-top: 18px; }.world-weather { top: 99px; } }

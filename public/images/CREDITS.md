@@ -50,5 +50,5 @@
 
 ## 追加处理记录（白色仙雾版）
 
-- `pano-ink.jpg`：由 `pano-mountains.jpg`（《千里江山图》局部）经 `tools/process_pano.py` 处理生成：灰度化、自动对比、gamma 0.72 提亮，再做暖墨灰（#3a3630）到宣纸白（#f4f0e5）的 duotone 映射，用作首页通栏以匹配全站白玉金配色。原画的公有领域属性不因处理而改变。
+- `pano-ink.jpg`：由 `pano-mountains.jpg`（《千里江山图》局部）处理生成：灰度化、自动对比、gamma 0.72 提亮，再做暖墨灰（#3a3630）到宣纸白（#f4f0e5）的 duotone 映射，曾用作旧版首页通栏。原画的公有领域属性不因处理而改变。
 - `cranes.jpg`：未改文件本体，页面中以 CSS `filter: saturate(0.55) brightness(1.06)` 轻度降饱和呈现。

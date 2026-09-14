@@ -28,6 +28,4 @@
 
 GLB 使用 Draco 压缩，原始网格数量与文件体积见 `manifest.json`。位置量化为 16 位、法线 10 位。解码器从项目已有的 Three.js r179 包复制到 `../draco/`，在本地通过 WebAssembly 解码，不依赖外部 CDN。解码器采用 Apache-2.0 许可，完整许可位于 `../draco/LICENSE`。
 
-运行 `node tools/check_realm_models.mjs` 可验证 GLB 完整性、模型层级、解码器一致性、飞行姿态、驻足接触与静止时间行为。
-
 浏览器端按材质合并静态建筑；仙鹤实例共享几何与材质，肩腕节点保留层级，飞行姿态由 `src/world/cranes.js` 控制。近景会收窄阴影采样区域；晨昏环境影响瓦面、木构、羽毛与窗纸亮度。石材和羽毛的细微变化由着色器补充。

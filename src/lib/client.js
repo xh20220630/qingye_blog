@@ -9,9 +9,9 @@ export async function getSession(refresh = false) {
   }).finally(() => { pendingSession = undefined; });
   return pendingSession;
 }
-export async function api(url, { method = 'GET', body, binary, headers = {} } = {}) {
+export async function api(url, { method = 'GET', body } = {}) {
   const session = await getSession();
-  const response = await fetch(url, { method, credentials: 'same-origin', headers: { ...(method !== 'GET' && !binary ? { 'Content-Type': 'application/json' } : {}), ...(session.csrf ? { 'X-CSRF-Token': session.csrf } : {}), ...headers }, body: binary || (body === undefined ? undefined : JSON.stringify(body)) });
+  const response = await fetch(url, { method, credentials: 'same-origin', headers: { ...(method !== 'GET' ? { 'Content-Type': 'application/json' } : {}), ...(session.csrf ? { 'X-CSRF-Token': session.csrf } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
   let data;
   try { data = await response.json(); } catch { throw new Error('服务返回异常，请稍后重试'); }
   if (!response.ok) { const error = new Error(data.error || '操作未完成'); error.status = response.status; throw error; }

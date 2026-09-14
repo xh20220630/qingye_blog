@@ -247,7 +247,6 @@ export function createAtmosphere(renderer, scene, camera) {
   const screenCamera = new THREE.Camera();
   let lastTime = 0, windSpeed = 1, windTarget = 1;
   return {
-    lightDirection,
     sky,
     setWind(mode) { windTarget = {calm: .45, breeze: 1, strong: 1.8}[mode] ?? 1; },
     setSky(mode) {

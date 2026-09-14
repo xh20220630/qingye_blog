@@ -7,7 +7,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 
-export const projectRoot = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
+const projectRoot = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
 export const token = () => randomBytes(32).toString('base64url');
 export const digest = (value) => createHash('sha256').update(value).digest('hex');
 export class HttpError extends Error {
@@ -40,9 +40,9 @@ export async function passwordMatches(password, encoded) {
   const expected = Buffer.from(hash, 'hex');
   return expected.length === key.length && timingSafeEqual(key, expected);
 }
-export function openStore(options = {}) {
-  const root = options.root || projectRoot;
-  const dataDir = path.resolve(options.dataDir || process.env.QY_DATA_DIR || path.join(os.homedir(), '.qingye-blog', digest(root).slice(0, 12)));
+export function openStore() {
+  const root = projectRoot;
+  const dataDir = path.resolve(process.env.QY_DATA_DIR || path.join(os.homedir(), '.qingye-blog', digest(root).slice(0, 12)));
   mkdirSync(dataDir, { recursive: true, mode: 0o700 });
   mkdirSync(path.join(dataDir, 'media'), { recursive: true });
   const db = new DatabaseSync(path.join(dataDir, 'blog.sqlite'), { timeout: 5000 });

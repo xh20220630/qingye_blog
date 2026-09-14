@@ -231,19 +231,14 @@ const jsonld = {
     /* 灯箱：文中图片点击放大，ESC 关闭；打开时禁用翻页快捷键 */
     const lightbox = document.getElementById('qy-lightbox') as HTMLDialogElement | null;
     const lightboxImg = document.getElementById('qy-lightbox-img') as HTMLImageElement | null;
-    let lightboxOpen = false;
     function openLightbox(src: string, alt: string) {
       if (!lightbox || !lightboxImg) return;
       lightboxImg.src = src;
       lightboxImg.alt = alt;
       lightbox.showModal();
-      lightbox.classList.add('is-open');
-      lightboxOpen = true;
     }
     function closeLightbox() {
       lightbox?.close();
-      lightbox?.classList.remove('is-open');
-      lightboxOpen = false;
     }
     document.querySelectorAll('.juan-body img, .article-cover').forEach((img) => {
       const image = img as HTMLImageElement;
@@ -255,7 +250,6 @@ const jsonld = {
       image.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openLightbox(image.currentSrc || image.src, image.alt); } });
     });
     lightbox?.addEventListener('click', closeLightbox);
-    lightbox?.addEventListener('close', () => { lightboxOpen = false; lightbox.classList.remove('is-open'); });
     lightbox?.addEventListener('keydown', event => { if (event.key === 'Escape') event.stopPropagation(); });
 
     document.querySelector('#reading-print')?.addEventListener('click', () => window.print());
@@ -302,7 +296,7 @@ const jsonld = {
 
     /* 键盘快捷键：← 上一篇，→ 下一篇，/ 去检索 */
     document.addEventListener('keydown', (e) => {
-      if (lightboxOpen) {
+      if (lightbox?.open) {
         if (e.key === 'Escape') closeLightbox();
         return;
       }

@@ -7,9 +7,6 @@
 .community-form input,.community-form textarea,.community-form select,.search-filters select,.search-filters input{border:1px solid #c9d9d6;border-radius:5px;background:#ffffffb5;color:#294b51;padding:12px 14px;font:inherit;width:100%;min-width:0;outline-offset:3px}
 .community-form textarea{line-height:1.9;resize:vertical}
 .community-form :is(input,textarea,select):focus{outline:2px solid #7daca9}
-.community-form .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.community-form .check-label{display:flex;align-items:start;gap:10px;font-size:.78rem;line-height:1.7}
-.community-form .check-label input{width:auto;margin-top:5px}
 .community-form button,.community-button{border:1px solid #396d73;background:#356e73;color:#fff;padding:11px 19px;border-radius:5px;cursor:pointer;font:inherit;font-size:.84rem;width:fit-content;line-height:1.5;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
 .community-button.secondary{background:transparent;color:#356b71;border-color:#c1d4d1}
 .community-form button:hover,.community-button:hover{filter:brightness(1.08)}
@@ -64,7 +61,6 @@
 .comment-item p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.95;margin:14px 0 12px}
 .comment-item .comment-parent{font-size:.71rem;color:#8d9b8d;background:#edf2ea;padding:5px 10px;width:fit-content}
 .comment-reply{padding:3px 0;border:0;background:none;color:#5e868c;font-size:.76rem;cursor:pointer}
-.comment-staff{font-size:.62rem;color:#9d8351;border:1px solid #d9cdaa;padding:1px 5px;border-radius:3px}
 .comment-honeypot{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .reading-resume{display:flex;gap:16px;align-items:center;justify-content:space-between;font-size:.8rem;padding:15px 18px;border:1px solid #c8dcd1;background:#e9f1e8;margin:20px 0;color:#537b74}
 .reading-resume button{background:none;border:0;color:#326d71;font:inherit;cursor:pointer}
@@ -109,7 +105,6 @@ html[data-reading-width=wide] .juan-layout{grid-template-columns:minmax(0,1fr) 1
 .community-row h3{font-size:1rem}
 }
 @media(max-width:550px){.community-panel{padding:20px}
-.community-form .form-row{grid-template-columns:1fr}
 .category-grid{grid-template-columns:1fr}
 .community-row .community-button{padding:8px 10px;font-size:.72rem}
 .community-tabs{gap:4px}
@@ -123,7 +118,7 @@ html[data-reading-width=wide] .juan-layout{grid-template-columns:minmax(0,1fr) 1
 .community-actions .community-button{font-size:.76rem}
 .feed-address code{font-size:.67rem}
 }
-@media print{.site-header,.site-footer,.immortal-mist,.post-actions,.float-tools,.juan-toc,.comment-section,.reading-tools,.reading-resume,.pn-nav,.related-list,.series-nav,.mobile-toc,.juan-progress,.copyright-box{display:none!important}
+@media print{.site-header,.site-footer,.post-actions,.float-tools,.juan-toc,.comment-section,.reading-tools,.reading-resume,.pn-nav,.related-list,.series-nav,.mobile-toc,.juan-progress,.copyright-box{display:none!important}
 .juan-layout{display:block!important;max-width:none!important;padding:0!important}
 .scroll-paper,.juan-body,body{background:white!important;box-shadow:none!important;color:black!important}
 .juan-body{font-size:11pt!important}
@@ -141,4 +136,3 @@ body::before,body::after{display:none!important}
 .mobile-toc{display:block}
 html[data-reading-width=wide] .juan-layout{grid-template-columns:minmax(0,1fr)}
 }
-

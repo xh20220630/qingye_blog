@@ -13,9 +13,9 @@ async function readBody(req, limit = 1024 * 1024) {
   for await (const part of req) { size += part.length; assert(size <= limit, 413, '上传内容过大'); parts.push(part); }
   return Buffer.concat(parts);
 }
-export function createApp(options = {}) {
-  const store = options.store || openStore(options);
-  const staticRoot = path.resolve(options.staticRoot || process.env.QY_STATIC_DIR || path.join(store.root, 'dist'));
+export function createApp() {
+  const store = openStore();
+  const staticRoot = path.resolve(process.env.QY_STATIC_DIR || path.join(store.root, 'dist'));
   const rates = new Map();
   const dummyPassword = passwordHash(token());
   const siteOrigin = (process.env.SITE_URL || 'http://127.0.0.1:4324').replace(/\/$/, '');
@@ -56,7 +56,7 @@ export function createApp(options = {}) {
         rate(`api:${ip}`, 360);
         if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
           const origin = req.headers.origin;
-          const expected = new Set([siteOrigin, `${secure ? 'https' : 'http'}://${host}`, ...(options.origins || [])]);
+          const expected = new Set([siteOrigin, `${secure ? 'https' : 'http'}://${host}`]);
           if (process.env.NODE_ENV !== 'production' && /^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(req.socket.remoteAddress || '')) { expected.add('http://127.0.0.1:4322'); expected.add('http://localhost:4322'); }
           assert(origin && expected.has(origin), 403, '请求来源验证失败');
           if (session) assert(req.headers['x-csrf-token'] === session.csrf, 403, '会话验证失败，请刷新页面');

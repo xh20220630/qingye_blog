@@ -1,8 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Comments from '../components/Comments.astro';
-import { siteConfig } from '../config';
-const giscus = siteConfig.giscus;
 ---
 <BaseLayout title="留言板" description="青野山房留言板：道友路过，不妨留下一言半语。">
   <div class="container">
@@ -11,25 +9,6 @@ const giscus = siteConfig.giscus;
       <p class="page-desc">山房门前设一青石，道友路过，不妨留下一言半语。散人巡山时自会一一拜读。</p>
     </header>
 
-    {giscus ? (
-      <div class="giscus-wrap">
-        <script src="https://giscus.app/client.js"
-          data-repo={giscus.repo}
-          data-repo-id={giscus.repoId}
-          data-category={giscus.category}
-          data-category-id={giscus.categoryId}
-          data-mapping={giscus.mapping ?? 'pathname'}
-          data-strict="0"
-          data-reactions-enabled="1"
-          data-emit-metadata="0"
-          data-input-position="top"
-          data-theme="light"
-          data-lang="zh-CN"
-          crossorigin="anonymous"
-          async></script>
-      </div>
-    ) : (
-      <Comments thread="guestbook" />
-    )}
+    <Comments thread="guestbook" />
   </div>
 </BaseLayout>

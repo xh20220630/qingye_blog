@@ -41,17 +41,12 @@ const current = (href: string) => href === '/' ? path === '/' : path === href ||
     </div>
   </div>
 </header>
-<div id="header-sentinel" aria-hidden="true"></div>
 
 <script>
   const header = document.getElementById('site-header');
-  const sentinel = document.getElementById('header-sentinel');
   const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
   const more = document.querySelector<HTMLDetailsElement>('.nav-more');
 
-  if (header && sentinel) {
-    new IntersectionObserver(([entry]) => header.classList.toggle('is-scrolled', !entry.isIntersecting)).observe(sentinel);
-  }
   const closeMenu = () => {
     header?.classList.remove('menu-open');
     toggle?.setAttribute('aria-expanded', 'false');
