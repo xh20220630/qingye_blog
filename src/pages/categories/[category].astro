@@ -1,11 +1,12 @@
 ---
+import { isPublished } from '../../lib/publishing';
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { fmtDate } from '../../lib/format';
 
 export const getStaticPaths = (async () => {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  const posts = (await getCollection('blog', isPublished))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
   const cats = [...new Set(posts.map((p) => p.data.category))];
   return cats.map((cat) => ({
@@ -21,6 +22,7 @@ const { category, posts } = Astro.props;
     <header class="page-head">
       <h1 class="page-title">{category}</h1>
       <p class="page-desc">此分阁藏卷 {posts.length} 篇。<a href="/blog">返回藏经阁总目</a></p>
+      <a class="community-button secondary" href={`/feeds/category/${category}.xml`}>订阅此分类 ↗</a>
     </header>
     <div class="post-rows">
       {posts.map((p) => (

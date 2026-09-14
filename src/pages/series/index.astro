@@ -1,8 +1,9 @@
 ---
+import { isPublished } from '../../lib/publishing';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const posts = await getCollection('blog', ({ data }) => !data.draft);
+const posts = await getCollection('blog', isPublished);
 const seriesMap = new Map<string, typeof posts>();
 for (const p of posts) {
   if (!p.data.series) continue;

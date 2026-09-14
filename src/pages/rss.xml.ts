@@ -1,14 +1,16 @@
 import rss from '@astrojs/rss';
+import { siteConfig } from '../config';
+import { isPublished } from '../lib/publishing';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  const posts = (await getCollection('blog', isPublished))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
   return rss({
-    title: '青野山房',
-    description: '云深不知处，码上见真章。青野散人的修仙与码字手记。',
-    site: context.site ?? 'https://blog.qingye.example',
+    title: siteConfig.name,
+    description: siteConfig.description,
+    site: context.site ?? siteConfig.url,
     items: posts.map((p) => ({
       title: p.data.title,
       description: p.data.description,

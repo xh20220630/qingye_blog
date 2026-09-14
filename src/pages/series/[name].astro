@@ -1,11 +1,12 @@
 ---
+import { isPublished } from '../../lib/publishing';
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { fmtDate } from '../../lib/format';
 
 export const getStaticPaths = (async () => {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getCollection('blog', isPublished);
   const names = [...new Set(posts.map((p) => p.data.series).filter(Boolean))] as string[];
   return names.map((name) => ({
     params: { name },
@@ -25,6 +26,7 @@ const { name, posts } = Astro.props;
     <header class="page-head">
       <h1 class="page-title">{name}</h1>
       <p class="page-desc">本系列共 {posts.length} 卷，按刊刻先后为卷序。<a href="/series">返回系列总目</a></p>
+      <a class="community-button secondary" href={`/feeds/series/${name}.xml`}>订阅此系列 ↗</a>
     </header>
     <div>
       {posts.map((p, i) => (

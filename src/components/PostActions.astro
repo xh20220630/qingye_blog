@@ -4,13 +4,13 @@ interface Props { slug: string; title: string; }
 const { slug, title } = Astro.props;
 ---
 <div class="post-actions" data-slug={slug} data-title={title}>
-  <button class="act-btn" id="qy-like" type="button">
+  <button class="act-btn" id="qy-like" type="button" aria-pressed="false">
     <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
       <path d="M5 20 a4.5 4.5 0 0 1 1.2-8.9 a6 6 0 0 1 11.6-1.4 a5 5 0 0 1 7 4.6 a3.6 3.6 0 0 1-1 7.1 z" />
     </svg>
-    <span>随喜</span><span class="act-n" id="qy-like-n">0</span>
+    <span>随喜</span><span class="act-n" id="qy-like-n">—</span>
   </button>
-  <button class="act-btn" id="qy-fav" type="button">
+  <button class="act-btn" id="qy-fav" type="button" aria-pressed="false">
     <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
       <rect x="8" y="4" width="16" height="24" rx="2" />
       <path d="M13 4 v8 l3-2.4 L19 12 V4" />
@@ -26,69 +26,5 @@ const { slug, title } = Astro.props;
   </button>
 </div>
 
-<script>
-  const box = document.querySelector('.post-actions') as HTMLElement | null;
-  if (box) {
-    const slug = box.dataset.slug || '';
-    const title = box.dataset.title || '';
-    const likeBtn = document.getElementById('qy-like');
-    const likeN = document.getElementById('qy-like-n');
-    const favBtn = document.getElementById('qy-fav');
-    const favLabel = document.getElementById('qy-fav-label');
-    const shareBtn = document.getElementById('qy-share');
-    const shareLabel = document.getElementById('qy-share-label');
-
-    const read = (k: string, fb: any) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? fb; } catch { return fb; } };
-    const write = (k: string, v: any) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-
-    /* 点赞：qy_likes = { slug: count }，qy_liked = [slug] */
-    let likes: Record<string, number> = read('qy_likes', {});
-    let liked: string[] = read('qy_liked', []);
-    const syncLike = () => {
-      if (likeN) likeN.textContent = String(likes[slug] || 0);
-      likeBtn?.classList.toggle('is-on', liked.includes(slug));
-    };
-    likeBtn?.addEventListener('click', () => {
-      if (liked.includes(slug)) {
-        likes[slug] = Math.max(0, (likes[slug] || 1) - 1);
-        liked = liked.filter((s) => s !== slug);
-      } else {
-        likes[slug] = (likes[slug] || 0) + 1;
-        liked = [...liked, slug];
-      }
-      write('qy_likes', likes); write('qy_liked', liked);
-      syncLike();
-    });
-    syncLike();
-
-    /* 收藏：qy_favs = [{ slug, title }] */
-    let favs: { slug: string; title: string }[] = read('qy_favs', []);
-    const syncFav = () => {
-      const on = favs.some((f) => f.slug === slug);
-      favBtn?.classList.toggle('is-on', on);
-      if (favLabel) favLabel.textContent = on ? '已在袖囊' : '收进袖囊';
-    };
-    favBtn?.addEventListener('click', () => {
-      if (favs.some((f) => f.slug === slug)) favs = favs.filter((f) => f.slug !== slug);
-      else favs = [...favs, { slug, title }];
-      write('qy_favs', favs);
-      syncFav();
-    });
-    syncFav();
-
-    /* 分享：navigator.share，降级复制链接 */
-    shareBtn?.addEventListener('click', async () => {
-      const url = location.href;
-      if (navigator.share) {
-        try { await navigator.share({ title, url }); return; } catch {}
-      }
-      try {
-        await navigator.clipboard.writeText(url);
-        if (shareLabel) shareLabel.textContent = '链接已录';
-      } catch {
-        window.prompt('复制此链接', url);
-      }
-      setTimeout(() => { if (shareLabel) shareLabel.textContent = '传讯'; }, 1600);
-    });
-  }
-</script>
+<p class="post-service-status" id="post-service-status" role="status" aria-live="polite"></p>
+<script>import '../community/reading.js';</script>

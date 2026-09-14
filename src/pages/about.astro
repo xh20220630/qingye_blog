@@ -11,29 +11,28 @@ const stats = await getSiteStats();
     </header>
 
     <div class="about-hero">
-      <img src="/images/cranes.jpg" alt="宋徽宗《瑞鹤图》局部：白鹤翔于祥云之间" loading="lazy" />
+      <img src="/images/xianxia/pavilion.webp" alt="白鹤飞过云海，青瓦书亭静立于仙山之上" width="1672" height="941" />
     </div>
 
     <div class="about-grid">
       <div class="about-prose">
         <p>散人本姓已不可考，自号青野，取「青山野渡，自在人家」之意。白日里在人间的格子间修行，与需求、报错和截止日期三大心魔缠斗；入夜归山，点一盏青灯，把白天渡不过的劫，写成阁中一卷卷玉简。</p>
         <p>有人问：修仙与码字有何相通？散人答曰：皆为逆天而行。修仙者夺天地造化，码字者夺编译器造化。境界低了，便渡不动需求的雷劫；注释少了，后世弟子读你的代码，便如读无字天书。</p>
-        <p>阁中所藏，或谈术法（技术），或记山中日课（随笔），或录渡劫心得（复盘）。文未必精妙，但保证每卷皆是散人亲手所刻，没有请人代笔，更没有让仙鹤代笔。</p>
+        <p>阁中所藏，或谈术法（技术），或记山中日课（随笔），或录渡劫心得（复盘）。愿每篇文字都能留下具体的观察、有用的经验，也容得下尚未想明白的问题。</p>
         <p>若道友读罢有悟，可于心中默念三遍「妙啊」，散人在山中自会心生感应。若无悟，亦无妨，山中云雾常年不散，本就无所谓看得清、看不清。</p>
 
         <h2 style="margin-top: 2.5rem; letter-spacing: 0.2em;">营造之术</h2>
-        <p>此阁为静态石室，以 Astro 锻铸骨架，Three.js 布下满谷云海与灵光，GSAP 执掌卷轴开合之时机，Fuse.js 为玉简检索之法。全站无数据库、无服务器灵石消耗，建成之日即为不朽。</p>
+        <p>此阁以 Astro 锻铸骨架，以 Three.js 营造一方可漫游的云上洞天。浮岛、楼阁、松影与流瀑立于天地之间，云海随光流转。道友可循图录御风寻山，也可收起远景，静坐阅卷。</p>
 
         <h2 id="credits" style="margin-top: 2.5rem; letter-spacing: 0.2em;">素材来源</h2>
-        <p>阁中装饰丹青皆取材于公有领域中国古画高清扫描件（Wikimedia Commons，PD-art），作者均已逝世数百年，版权保护期早满；宣纸纹理为程序生成。明细如下：</p>
+        <p>洞天中的浮岛、建筑、星轨仪与仙鹤由几何模型营造，云海实时描绘厚度、透光与阴影。先前生成的仙境丹青作为书卷插图与静览背景保留，古画素材亦保留来源记录。</p>
         <ul class="credits-list" style="margin: 0.8em 0 0 1.4em; color: #3a3f42;">
-          <li><b>云海（首页主景）</b>：清 · 梅清《黄山图册·百步云梯》，故宫博物院藏</li>
-          <li><b>水墨通栏（首页中段）</b>：北宋 · 王希孟《千里江山图》卷局部（墨色化处理），北京故宫博物院藏</li>
-          <li><b>水墨远山（列表页眉）</b>：元 · 黄公望《富春山居图·无用师卷》局部，台北故宫博物院藏</li>
-          <li><b>瑞鹤（本页与页脚）</b>：北宋 · 赵佶《瑞鹤图》卷局部，辽宁省博物馆藏</li>
-          <li><b>宣纸纹理（卷轴纸面）</b>：程序生成，本站自用</li>
+          <li><b>青野仙境</b>：银龙、月宫、悬空仙山与云海，AI 生成场景</li>
+          <li><b>云上书阁</b>：白玉台、青瓦亭与远山瀑布，AI 生成场景</li>
+          <li><b>洞天云海</b>：Three.js 体积云，与山体深度、晨昏光照共同渲染</li>
+          <li><b>山房纹饰</b>：以山形与流云为意象绘制的矢量装饰</li>
         </ul>
-        <p>完整版权记录见仓库 <code>public/images/CREDITS.md</code>。</p>
+        <p>素材说明见 <a href="/images/xianxia/CREDITS.md">仙境丹青记录</a>，旧版来源见 <a href="/images/CREDITS.md">古画素材记录</a>。</p>
       </div>
 
       <aside>
@@ -49,7 +48,8 @@ const stats = await getSiteStats();
         </div>
         <div class="about-card" style="margin-bottom: 1.4rem;" id="qy-fav-card">
           <h3>道友的袖囊</h3>
-          <ul id="qy-fav-list"><li class="fav-empty">袖囊空空。在文章页点「收进袖囊」，书卷会在此处现身。</li></ul>
+          <p class="community-muted">珍藏的卷、走过的路，都在袖囊里。登录后也能在另一台设备接着读。</p>
+          <a class="community-button secondary" href="/shelf">展开我的袖囊 ↗</a>
         </div>
         <div class="about-card" style="margin-bottom: 1.4rem;">
           <h3>散人名帖</h3>
@@ -64,9 +64,10 @@ const stats = await getSiteStats();
         <div class="about-card">
           <h3>此阁营造谱</h3>
           <ul>
-            <li>Astro v5 · 静态输出</li>
-            <li>Three.js · 云海渲染</li>
-            <li>GSAP ScrollTrigger · 驭卷</li>
+            <li>Astro · 静态输出</li>
+            <li>Node.js / SQLite · 写作与留音</li>
+            <li>Three.js · 云海与浮岛</li>
+            <li>白玉书卷 · 专注阅读</li>
             <li>Fuse.js · 玉简检索</li>
             <li>手写 CSS · 不染框架</li>
           </ul>
@@ -75,16 +76,4 @@ const stats = await getSiteStats();
     </div>
   </div>
 
-  <script>
-    const list = document.getElementById('qy-fav-list');
-    if (list) {
-      let favs: { slug: string; title: string }[] = [];
-      try { favs = JSON.parse(localStorage.getItem('qy_favs') || '[]'); } catch {}
-      if (Array.isArray(favs) && favs.length > 0) {
-        list.innerHTML = favs
-          .map((f) => `<li><a href="/blog/${f.slug}/">${f.title}</a></li>`)
-          .join('');
-      }
-    }
-  </script>
 </BaseLayout>

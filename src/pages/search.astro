@@ -10,101 +10,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     <div class="search-panel">
       <div class="search-input-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
         <input id="search-input" class="search-input" type="search" placeholder="输入关键词，如：修仙、Astro、渡劫" aria-label="搜索关键词" autocomplete="off" />
       </div>
-      <p class="search-state" id="search-state">法阵待命中，输入关键词开始检索。</p>
-      <div class="search-results" id="search-results" hidden></div>
+      <div class="search-suggestions"><span>随缘寻卷</span>{['阵法', '修仙', '编程', '游记'].map((word) => <button type="button" data-query={word}>{word}</button>)}</div>
+      <div class="search-filters"><label>分类<select id="filter-category"><option>全部分类</option></select></label><label>标签<select id="filter-tag"><option>全部标签</option></select></label><label>系列<select id="filter-series"><option>全部系列</option></select></label><label>年份<select id="filter-year"><option>全部年份</option></select></label></div>
+      <div class="search-footer"><label class="community-muted">排序 <select id="filter-sort"><option value="relevance">相关优先</option><option value="newest">最新发布</option><option value="oldest">最早发布</option><option value="title">标题排序</option></select></label><button class="community-button secondary" id="clear-search">清空条件</button></div>
+      <p class="search-state" id="search-state" role="status" aria-live="polite">法阵待命中，输入关键词开始检索。</p>
+      <div class="search-results" id="search-results" hidden></div><div class="search-pagination" id="search-pagination" style="margin-top:24px"></div>
     </div>
   </div>
 
-  <script>
-    import Fuse from 'fuse.js';
-
-    const input = document.getElementById('search-input') as HTMLInputElement | null;
-    const stateEl = document.getElementById('search-state');
-    const resultsEl = document.getElementById('search-results');
-
-    let fuse: Fuse<any> | null = null;
-    let loading = false;
-    let timer: number | undefined;
-
-    function setState(text: string, isError = false) {
-      if (!stateEl) return;
-      stateEl.textContent = text;
-      stateEl.classList.toggle('is-error', isError);
-    }
-
-    function escapeHtml(s: string) {
-      return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
-    }
-
-    async function ensureIndex() {
-      if (fuse || loading) return;
-      loading = true;
-      setState('正在展开检索法阵，请稍候。');
-      try {
-        const res = await fetch('/search-index.json');
-        if (!res.ok) throw new Error(String(res.status));
-        const data = await res.json();
-        fuse = new Fuse(data, {
-          keys: [
-            { name: 'title', weight: 0.45 },
-            { name: 'description', weight: 0.25 },
-            { name: 'tags', weight: 0.15 },
-            { name: 'category', weight: 0.05 },
-            { name: 'excerpt', weight: 0.1 },
-          ],
-          threshold: 0.35,
-          ignoreLocation: true,
-          includeScore: true,
-        });
-        setState('法阵就绪，输入关键词开始检索。');
-      } catch {
-        setState('法阵展开失败，索引未能载入。请刷新重试。', true);
-      } finally {
-        loading = false;
-      }
-    }
-
-    function runSearch() {
-      if (!input || !resultsEl) return;
-      const q = input.value.trim();
-      if (!q) {
-        resultsEl.hidden = true;
-        resultsEl.innerHTML = '';
-        setState(fuse ? '法阵就绪，输入关键词开始检索。' : '法阵待命中，输入关键词开始检索。');
-        return;
-      }
-      if (!fuse) { ensureIndex().then(runSearch); return; }
-      const hits = fuse.search(q).slice(0, 20);
-      if (hits.length === 0) {
-        resultsEl.hidden = true;
-        resultsEl.innerHTML = '';
-        setState(`遍检全阁，未见与「${q}」相关的玉简。`);
-        return;
-      }
-      setState(`检得 ${hits.length} 卷相关玉简。`);
-      resultsEl.hidden = false;
-      resultsEl.innerHTML = hits.map(({ item }) => `
-        <div class="search-hit">
-          <h3><a href="${item.url}">${escapeHtml(item.title)}</a></h3>
-          <div class="hit-meta">
-            <span>${escapeHtml(item.category)}</span>
-            <span>${escapeHtml(item.date)}</span>
-            ${(item.tags || []).map((t: string) => `<span>#${escapeHtml(t)}</span>`).join('')}
-          </div>
-          <p class="hit-desc">${escapeHtml(item.description)}</p>
-        </div>
-      `).join('');
-    }
-
-    input?.addEventListener('input', () => {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(runSearch, 220);
-    });
-    input?.addEventListener('focus', ensureIndex, { once: true });
-    if (new URLSearchParams(location.search).get('focus') === '1') {
-      input?.focus();
-    }
-  </script>
+  <script>import '../community/search.js';</script>
 </BaseLayout>

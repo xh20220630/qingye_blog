@@ -1,22 +1,20 @@
 ---
+import { isPublished } from '../lib/publishing';
 import { getCollection } from 'astro:content';
 import { getSiteStats, fmtChars } from '../lib/stats';
 import { siteConfig } from '../config';
 
 const stats = await getSiteStats();
-const posts = await getCollection('blog', ({ data }) => !data.draft);
+const posts = await getCollection('blog', isPublished);
 const seriesNames = [...new Set(posts.map((p) => p.data.series).filter(Boolean))] as string[];
 ---
 <footer class="site-footer">
-  <div class="footer-cranes" aria-hidden="true">
-    <img src="/images/cranes.jpg" alt="" loading="lazy" />
-  </div>
   <div class="footer-main">
     <div class="container">
       <div class="footer-inner">
         <div class="footer-col footer-brand">
-          <span class="brand-name">青野山房</span>
-          <p>云深不知处，码上见真章。山房主人青野散人，白日码字营生，夜里修仙炼气，偶有所得，刻于玉简，存于此阁。</p>
+          <span class="brand-name">{siteConfig.name}</span>
+          <p>{siteConfig.description}</p>
         </div>
         <div class="footer-col">
           <h4>山房舆图</h4>
@@ -27,7 +25,9 @@ const seriesNames = [...new Set(posts.map((p) => p.data.series).filter(Boolean))
             <li><a href="/tags">符印索引</a></li>
             <li><a href="/links">友邻仙山</a></li>
             <li><a href="/guestbook">留言板</a></li>
-            <li><a href="/rss.xml">RSS 订阅</a></li>
+            <li><a href="/subscribe">订阅山讯</a></li>
+            <li><a href="/shelf">收藏与阅读足迹</a></li>
+            <li><a href="/account">道友身份</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -37,14 +37,14 @@ const seriesNames = [...new Set(posts.map((p) => p.data.series).filter(Boolean))
           </ul>
           <h4 style="margin-top: 1.4rem;">素材与版权</h4>
           <ul>
-            <li><a href="/about#credits">古画素材来源</a></li>
+            <li><a href="/about#credits">仙境丹青来源</a></li>
             <li><a href="/about">关于散人</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-copy">
         <span>山房志 · 藏卷 {stats.postCount} 篇 · 累计 {fmtChars(stats.totalChars)} 言 · 开阁 {stats.daysSinceStart} 天</span>
-        <span>青野散人 手辑 · {siteConfig.icp}</span>
+        <span>{siteConfig.author} 手辑{siteConfig.icp && <> · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{siteConfig.icp}</a></>}</span>
       </div>
     </div>
   </div>

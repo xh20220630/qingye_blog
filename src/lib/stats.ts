@@ -1,3 +1,4 @@
+import { isPublished } from './publishing';
 import { getCollection } from 'astro:content';
 
 export interface SiteStats {
@@ -10,7 +11,7 @@ export interface SiteStats {
 }
 
 export async function getSiteStats(): Promise<SiteStats> {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getCollection('blog', isPublished);
   const tags = new Set<string>();
   const cats = new Set<string>();
   const series = new Set<string>();

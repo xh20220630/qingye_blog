@@ -1,12 +1,14 @@
 ---
+import { isPublished } from '../../lib/publishing';
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostActions from '../../components/PostActions.astro';
+import Comments from '../../components/Comments.astro';
 import { fmtDate, readingTime } from '../../lib/format';
 
 export const getStaticPaths = (async () => {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  const posts = (await getCollection('blog', isPublished))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
   return posts.map((post, i) => {
     // 系列内导航：按 pubDate 正序编号
@@ -37,7 +39,11 @@ export const getStaticPaths = (async () => {
         prev: posts[i + 1] ?? null,
         next: posts[i - 1] ?? null,
         related: posts
-          .filter((p) => p.id !== post.id && p.data.tags.some((t) => post.data.tags.includes(t)))
+          .filter((p) => p.id !== post.id)
+          .map((p) => ({ post: p, score: p.data.tags.filter(t => post.data.tags.includes(t)).length * 3 + Number(p.data.category === post.data.category) + (post.data.series && p.data.series === post.data.series ? 4 : 0) }))
+          .filter(p => p.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .map(p => p.post)
           .slice(0, 3),
         seriesNav,
       },
@@ -97,6 +103,7 @@ const jsonld = {
           {post.data.updatedDate && <span>修于 {fmtDate(post.data.updatedDate)}</span>}
           <span>约 {minutes} 分钟可读</span>
           <span>{post.data.author} 撰</span>
+          <span id="post-views"></span>
           {post.data.realm && <span class="realm-badge">境界 · {post.data.realm}</span>}
         </div>
         {post.data.tags.length > 0 && (
@@ -105,6 +112,11 @@ const jsonld = {
           </div>
         )}
       </header>
+
+      {post.data.cover && <img class="article-cover" src={post.data.cover} alt={post.data.title} loading="lazy" />}
+      <div class="reading-tools"><button id="reading-focus" aria-pressed="false">静心阅读</button><button id="reading-width" aria-pressed="false">舒展卷面</button><button id="reading-print">打印 / 保存 PDF</button><a href="#comments">留音 ↓</a></div>
+      <div class="reading-resume" id="reading-resume" hidden><span id="resume-label"></span><div><button id="resume-reading">接着读 →</button><button id="dismiss-resume" aria-label="关闭续读提示">×</button></div></div>
+      {toc.length > 0 && <details class="mobile-toc"><summary>展开卷目 · {toc.length} 节</summary><ul>{toc.map(h => <li class={`depth-${h.depth}`}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ul></details>}
 
       <div class="scroll-rod" aria-hidden="true"></div>
       <div class="scroll-paper">
@@ -176,6 +188,7 @@ const jsonld = {
           </section>
         )}
       </div>
+      {post.data.commentsEnabled && <Comments thread={post.id} />}
     </article>
 
     {toc.length > 0 && (
@@ -192,17 +205,12 @@ const jsonld = {
     )}
   </div>
 
-  <div class="lightbox" id="qy-lightbox" role="dialog" aria-label="图片放大预览">
-    <img id="qy-lightbox-img" src="" alt="放大预览" />
-  </div>
+  <dialog class="lightbox-native" id="qy-lightbox" aria-label="图片放大预览">
+    <button id="close-lightbox" aria-label="关闭图片预览">收起 ×</button>
+    <img id="qy-lightbox-img" alt="放大预览" />
+  </dialog>
 
   <script>
-    import gsap from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      || document.documentElement.dataset.motion === 'off';
-
     /* TOC 当前章节高亮（IntersectionObserver） */
     const links = document.querySelectorAll('#toc-list a');
     if (links.length > 0) {
@@ -221,23 +229,53 @@ const jsonld = {
     }
 
     /* 灯箱：文中图片点击放大，ESC 关闭；打开时禁用翻页快捷键 */
-    const lightbox = document.getElementById('qy-lightbox');
+    const lightbox = document.getElementById('qy-lightbox') as HTMLDialogElement | null;
     const lightboxImg = document.getElementById('qy-lightbox-img') as HTMLImageElement | null;
     let lightboxOpen = false;
-    function openLightbox(src: string) {
+    function openLightbox(src: string, alt: string) {
       if (!lightbox || !lightboxImg) return;
       lightboxImg.src = src;
+      lightboxImg.alt = alt;
+      lightbox.showModal();
       lightbox.classList.add('is-open');
       lightboxOpen = true;
     }
     function closeLightbox() {
+      lightbox?.close();
       lightbox?.classList.remove('is-open');
       lightboxOpen = false;
     }
-    document.querySelectorAll('.juan-body img').forEach((img) => {
-      img.addEventListener('click', () => openLightbox((img as HTMLImageElement).currentSrc || (img as HTMLImageElement).src));
+    document.querySelectorAll('.juan-body img, .article-cover').forEach((img) => {
+      const image = img as HTMLImageElement;
+      image.tabIndex = 0;
+      image.classList.add('lightbox-image-trigger');
+      image.setAttribute('role', 'button');
+      image.setAttribute('aria-label', `放大图片：${image.alt}`);
+      image.addEventListener('click', () => openLightbox(image.currentSrc || image.src, image.alt));
+      image.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openLightbox(image.currentSrc || image.src, image.alt); } });
     });
     lightbox?.addEventListener('click', closeLightbox);
+    lightbox?.addEventListener('close', () => { lightboxOpen = false; lightbox.classList.remove('is-open'); });
+    lightbox?.addEventListener('keydown', event => { if (event.key === 'Escape') event.stopPropagation(); });
+
+    document.querySelector('#reading-print')?.addEventListener('click', () => window.print());
+    document.querySelector('#reading-focus')?.addEventListener('click', event => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const on = button.getAttribute('aria-pressed') !== 'true';
+      document.body.dataset.reading = on ? 'focus' : '';
+      document.dispatchEvent(new CustomEvent('realm:reader', { detail: on }));
+      button.setAttribute('aria-pressed', String(on));
+      button.textContent = on ? '返回寻常阅读' : '静心阅读';
+    });
+    document.querySelector('#reading-width')?.addEventListener('click', event => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const on = button.getAttribute('aria-pressed') !== 'true';
+      document.documentElement.dataset.readingWidth = on ? 'wide' : '';
+      button.setAttribute('aria-pressed', String(on));
+    });
+    document.querySelectorAll('.juan-body h2[id], .juan-body h3[id]').forEach(heading => {
+      const link = document.createElement('a'); link.className = 'heading-anchor'; link.href = `#${heading.id}`; link.textContent = '#'; link.setAttribute('aria-label', `跳转至${heading.textContent}`); heading.append(link);
+    });
 
     /* 代码块复制按钮 */
     document.querySelectorAll('.juan-body pre').forEach((pre) => {
@@ -283,29 +321,23 @@ const jsonld = {
       }
     });
 
-    if (!reduced) {
-      gsap.registerPlugin(ScrollTrigger);
-
-      gsap.to('#juan-progress', {
-        scaleX: 1,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#juan-body',
-          start: 'top 70%',
-          end: 'bottom 40%',
-          scrub: 0.5,
-        },
-      });
-
-      const blocks = document.querySelectorAll(
-        '.juan-body > p, .juan-body > h2, .juan-body > h3, .juan-body > blockquote, .juan-body > pre, .juan-body > ul, .juan-body > ol, .juan-head'
-      );
-      gsap.set(blocks, { opacity: 0, y: 26 });
-      ScrollTrigger.batch(blocks, {
-        start: 'top 88%',
-        once: true,
-        onEnter: (els) => gsap.to(els, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.06 }),
+    const progress = document.getElementById('juan-progress');
+    const body = document.getElementById('juan-body');
+    let progressFrame = 0;
+    function updateProgress() {
+      if (progressFrame) return;
+      progressFrame = requestAnimationFrame(() => {
+        if (body && progress) {
+          const rect = body.getBoundingClientRect();
+          const range = Math.max(1, rect.height - window.innerHeight * .3);
+          const ratio = Math.max(0, Math.min(1, (window.innerHeight * .7 - rect.top) / range));
+          progress.style.transform = `scaleX(${ratio})`;
+        }
+        progressFrame = 0;
       });
     }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+    updateProgress();
   </script>
 </BaseLayout>

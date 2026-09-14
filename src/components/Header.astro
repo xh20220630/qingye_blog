@@ -1,54 +1,76 @@
 ---
+import RealmMark from './RealmMark.astro';
+import { siteConfig } from '../config';
 const nav = [
-  { href: '/', label: '首页' },
-  { href: '/blog', label: '文章' },
-  { href: '/series', label: '系列' },
-  { href: '/archive', label: '归档' },
-  { href: '/tags', label: '标签' },
-  { href: '/search', label: '检索' },
-  { href: '/about', label: '关于' },
-];
-const more = [
-  { href: '/links', label: '友邻' },
-  { href: '/guestbook', label: '留言' },
+  { href: '/', label: '山门', sub: '首页' },
+  { href: '/blog', label: '藏经阁', sub: '文章' },
+  { href: '/series', label: '修行录', sub: '系列' },
+  { href: '/archive', label: '岁月志', sub: '归档' },
+  { href: '/tags', label: '万象集', sub: '标签' },
+  { href: '/about', label: '关于散人', sub: '关于' },
 ];
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
-const current = (href: string) => {
-  const h = href.replace(/\/$/, '') || '/';
-  if (h === '/') return path === '/';
-  return path === h || path.startsWith(h + '/');
-};
+const current = (href: string) => href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
 ---
 <header class="site-header" id="site-header">
-  <div class="container header-inner">
-    <a class="brand" href="/">
-      <span class="brand-name">青野山房</span>
-      <span class="brand-sub">云深不知处</span>
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="青野山房首页">
+      <RealmMark class="brand-mark" />
+      <span class="brand-lockup"><span class="brand-name">{siteConfig.name}</span><span class="brand-sub">QINGYE SHANFANG</span></span>
     </a>
-    <nav class="site-nav" aria-label="主导航">
-      {nav.map((item) => (
-        <a href={item.href} aria-current={current(item.href) ? 'page' : undefined}>{item.label}</a>
-      ))}
-      <div class="nav-more">
-        <button type="button" aria-haspopup="true">更多</button>
+    <span class="header-motto">以心入道 · 以文观山</span>
+    <nav class="site-nav" id="site-nav" aria-label="主导航">
+      {nav.map((item) => <a href={item.href} title={item.sub} aria-current={current(item.href) ? 'page' : undefined}>{item.label}</a>)}
+      <details class="nav-more">
+        <summary>仙山往来 <span aria-hidden="true">⌄</span></summary>
         <div class="nav-more-menu">
-          {more.map((item) => (
-            <a href={item.href} aria-current={current(item.href) ? 'page' : undefined}>{item.label}</a>
-          ))}
+          <a href="/links" aria-current={current('/links') ? 'page' : undefined}>友邻仙山</a>
+          <a href="/guestbook" aria-current={current('/guestbook') ? 'page' : undefined}>山前留音</a>
+          <a href="/categories">按分类寻卷</a>
+          <a href="/shelf">袖囊 · 收藏与足迹</a>
+          <a href="/subscribe">订阅山讯</a>
+          <a href="/account">道友身份</a>
         </div>
-      </div>
+      </details>
     </nav>
+    <div class="header-actions">
+      <a class="nav-search" href="/search" aria-label="搜索玉简" title="搜索玉简">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="打开导航" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
+    </div>
   </div>
 </header>
-<div id="header-sentinel" aria-hidden="true" style="position:absolute;top:0;height:1px;width:1px;"></div>
+<div id="header-sentinel" aria-hidden="true"></div>
 
 <script>
   const header = document.getElementById('site-header');
   const sentinel = document.getElementById('header-sentinel');
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const more = document.querySelector<HTMLDetailsElement>('.nav-more');
+
   if (header && sentinel) {
-    const io = new IntersectionObserver(([entry]) => {
-      header.classList.toggle('is-scrolled', !entry.isIntersecting);
-    }, { rootMargin: '0px 0px 0px 0px' });
-    io.observe(sentinel);
+    new IntersectionObserver(([entry]) => header.classList.toggle('is-scrolled', !entry.isIntersecting)).observe(sentinel);
   }
+  const closeMenu = () => {
+    header?.classList.remove('menu-open');
+    toggle?.setAttribute('aria-expanded', 'false');
+    toggle?.setAttribute('aria-label', '打开导航');
+    if (more) more.open = false;
+  };
+  toggle?.addEventListener('click', () => {
+    const open = header?.classList.toggle('menu-open') ?? false;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? '关闭导航' : '打开导航');
+  });
+  document.addEventListener('click', (event) => {
+    if (!header?.contains(event.target as Node)) closeMenu();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      const wasOpen = header?.classList.contains('menu-open');
+      closeMenu();
+      if (wasOpen) toggle?.focus();
+    }
+  });
 </script>

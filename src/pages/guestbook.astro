@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Comments from '../components/Comments.astro';
 import { siteConfig } from '../config';
 const giscus = siteConfig.giscus;
 ---
 <BaseLayout title="留言板" description="青野山房留言板：道友路过，不妨留下一言半语。">
   <div class="container">
     <header class="page-head">
-      <h1 class="page-title">留言板</h1>
+      <h1 class="page-title">山前留音</h1>
       <p class="page-desc">山房门前设一青石，道友路过，不妨留下一言半语。散人巡山时自会一一拜读。</p>
     </header>
 
@@ -28,18 +29,7 @@ const giscus = siteConfig.giscus;
           async></script>
       </div>
     ) : (
-      <div class="guestbook-placeholder">
-        <h3>留言功能待接入</h3>
-        <p>青石已备，法阵未启。山房留言板基于 giscus（GitHub Discussions 驱动），待山主配好法阵阵眼即可启用。接入方法：在 <code>src/config.ts</code> 中将 <code>giscus</code> 由 <code>null</code> 改为如下配置（字段可在 giscus.app 生成），重新构建即生效：</p>
-        <pre>giscus: {'{'}
-  repo: '你的用户名/仓库名',
-  repoId: 'R_xxxxxx',
-  category: 'General',
-  categoryId: 'DIC_xxxxxx',
-  mapping: 'pathname',
-{'}'}</pre>
-        <p style="margin-top: 1rem;">在法阵开启之前，道友若有话说，可径往 <a href="/about">关于页</a> 默念三遍「青野散人」，山主自会心生感应。</p>
-      </div>
+      <Comments thread="guestbook" />
     )}
   </div>
 </BaseLayout>

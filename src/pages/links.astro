@@ -17,6 +17,7 @@ import { friendLinks } from '../config';
         </a>
       ))}
     </div>
+    {friendLinks.length === 0 && <div class="community-panel community-empty"><b>山径待相逢。</b>尚未收录友邻。若你也有一座用心经营的小站，欢迎留下山门地址。</div>}
     <p class="page-desc" style="margin-top: 2.5rem;">若道友亦有仙山愿与山房结为友邻，可于<a href="/guestbook">留言板</a>留下山门名号与来意。</p>
   </div>
 </BaseLayout>

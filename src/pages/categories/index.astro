@@ -1,0 +1,8 @@
+---
+import { getCollection } from 'astro:content';
+import { isPublished } from '../../lib/publishing';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const posts = await getCollection('blog', isPublished);
+const categories = [...new Set(posts.map(p => p.data.category))].map(name => ({ name, count: posts.filter(p => p.data.category === name).length })).sort((a, b) => b.count - a.count);
+---
+<BaseLayout title="分类寻卷" description="循着不同的山径，按分类寻找青野山房的文章。"><div class="container"><header class="page-head"><h1 class="page-title">循径入山</h1><p class="page-desc">各有一径，各见一山。选一个此刻想探索的方向。</p></header><div class="category-grid">{categories.map((category, i) => <a class="category-tile" href={`/categories/${category.name}/`}><span>PATH · {String(i + 1).padStart(2, '0')}</span><h2>{category.name}</h2><p>{category.count} 卷玉简 · 循径阅览 ↗</p></a>)}</div></div></BaseLayout>

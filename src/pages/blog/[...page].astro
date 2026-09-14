@@ -1,11 +1,12 @@
 ---
+import { isPublished } from '../../lib/publishing';
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { fmtDate } from '../../lib/format';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  const posts = (await getCollection('blog', isPublished))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
   return paginate(posts, { pageSize: 8 });
 }) satisfies GetStaticPaths;
@@ -15,11 +16,12 @@ const { page } = Astro.props;
 <BaseLayout title="全部文章" description="青野山房藏经阁：全部玉简书卷，按时刻倒序陈列。">
   <div class="container">
     <div class="deco-strip" aria-hidden="true">
-      <img src="/images/ink-mountains.jpg" alt="" loading="lazy" />
+      <img src="/images/xianxia/pavilion.webp" alt="" width="1672" height="941" />
     </div>
     <header class="page-head" style="padding-top: 2.2rem;">
       <h1 class="page-title">藏经阁</h1>
       <p class="page-desc">阁中玉简 {page.total} 卷，按刊刻时刻倒序陈列。第 {page.currentPage} 页，共 {page.lastPage} 页。</p>
+      <div class="community-actions" style="margin-top:22px"><a class="community-button secondary" href="/search">全文检索与筛选 ↗</a><a class="community-button secondary" href="/categories">循分类寻卷</a><a class="community-button secondary" href="/shelf">我的袖囊</a><a class="community-button secondary" href="/subscribe">订阅山讯</a></div>
     </header>
 
     <div class="post-rows">
@@ -28,6 +30,7 @@ const { page } = Astro.props;
           <span class="post-row-date">{fmtDate(p.data.pubDate)}</span>
           <div>
             <a class="post-row-title" href={`/blog/${p.id}/`}>{p.data.title}</a>
+            {p.data.featured && <span class="realm-badge" style="margin-left:10px">精选</span>}
             <p class="post-row-desc">{p.data.description}</p>
           </div>
           <span class="post-row-tags">

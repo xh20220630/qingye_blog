@@ -1,11 +1,12 @@
 ---
+import { isPublished } from '../../lib/publishing';
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { fmtDate } from '../../lib/format';
 
 export const getStaticPaths = (async () => {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  const posts = (await getCollection('blog', isPublished))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
   const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
   return tags.map((tag) => ({
@@ -21,6 +22,7 @@ const { tag, posts } = Astro.props;
     <header class="page-head">
       <h1 class="page-title">符印 · {tag}</h1>
       <p class="page-desc">此印所系书卷 {posts.length} 篇。<a href="/tags">返回符印总目</a></p>
+      <a class="community-button secondary" href={`/feeds/tag/${tag}.xml`}>订阅此标签 ↗</a>
     </header>
     <div class="post-rows">
       {posts.map((p) => (

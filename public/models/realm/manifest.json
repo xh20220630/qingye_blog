@@ -1,0 +1,44 @@
+{
+  "library": {
+    "file": "library.glb",
+    "bytes": 1203752,
+    "triangles": 212552,
+    "meshes": 27
+  },
+  "pagoda": {
+    "file": "pagoda.glb",
+    "bytes": 988696,
+    "triangles": 188160,
+    "meshes": 9
+  },
+  "pavilion": {
+    "file": "pavilion.glb",
+    "bytes": 224448,
+    "triangles": 38008,
+    "meshes": 7
+  },
+  "ferry": {
+    "file": "ferry.glb",
+    "bytes": 202932,
+    "triangles": 34008,
+    "meshes": 7
+  },
+  "gate": {
+    "file": "gate.glb",
+    "bytes": 172684,
+    "triangles": 29196,
+    "meshes": 7
+  },
+  "crane-flight": {
+    "file": "crane-flight.glb",
+    "bytes": 146996,
+    "triangles": 21780,
+    "meshes": 18
+  },
+  "crane-standing": {
+    "file": "crane-standing.glb",
+    "bytes": 105996,
+    "triangles": 15248,
+    "meshes": 14
+  }
+}

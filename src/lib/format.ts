@@ -16,7 +16,7 @@ export function readingTime(body: string | undefined): number {
 export function stripMarkdown(body: string | undefined, len = 220): string {
   if (!body) return '';
   return body
-    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/^```[^\n]*$/gm, ' ')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/^#{1,6}\s+/gm, '')

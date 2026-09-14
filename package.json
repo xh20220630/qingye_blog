@@ -6,14 +6,26 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "start": "node --env-file-if-exists=.env server/index.mjs",
+    "dev:api": "node --env-file-if-exists=.env server/index.mjs",
+    "test:blog": "node --test tests/blog.test.mjs",
+    "backup": "node --env-file-if-exists=.env server/backup.mjs"
   },
   "dependencies": {
+    "gray-matter": "^4.0.3"
+  },
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "devDependencies": {
+    "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/rss": "^4.0.11",
     "@astrojs/sitemap": "^3.4.1",
-    "astro": "^5.13.2",
+    "astro": "^7.3.2",
     "fuse.js": "^7.1.0",
     "gsap": "^3.13.0",
+    "rehype-sanitize": "^6.0.0",
     "three": "^0.179.1"
   }
 }

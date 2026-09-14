@@ -1,9 +1,10 @@
 ---
+import { isPublished } from '../lib/publishing';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { fmtDate, fmtYearMonth } from '../lib/format';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
+const posts = (await getCollection('blog', isPublished))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const groups = new Map<string, typeof posts>();
@@ -16,7 +17,7 @@ for (const p of posts) {
 <BaseLayout title="归档" description="青野山房岁月归档：以年月为序，回看每一卷玉简的刊刻时刻。">
   <div class="container">
     <div class="deco-strip" aria-hidden="true">
-      <img src="/images/ink-mountains.jpg" alt="" loading="lazy" />
+      <img src="/images/xianxia/pavilion.webp" alt="" width="1672" height="941" />
     </div>
     <header class="page-head" style="padding-top: 2.2rem;">
       <h1 class="page-title">岁月归档</h1>
