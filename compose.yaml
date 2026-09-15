@@ -6,17 +6,17 @@ services:
     build:
       context: .
       args:
-        SITE_URL: ${SITE_URL:-http://localhost:8080}
+        SITE_URL: ${SITE_URL:-http://localhost}
     init: true
     restart: unless-stopped
-    ports:
-      - "${QY_BIND_IP:-127.0.0.1}:${QY_HTTP_PORT:-8080}:4324"
+    expose:
+      - "4324"
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: "4324"
-      SITE_URL: ${SITE_URL:-http://localhost:8080}
-      QY_TRUST_PROXY: ${QY_TRUST_PROXY:-false}
+      SITE_URL: ${SITE_URL:-http://localhost}
+      QY_TRUST_PROXY: "true"
       QY_DATA_DIR: /data
       QY_STATIC_DIR: /app/dist
     volumes:
@@ -36,5 +36,39 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  caddy:
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    depends_on:
+      blog:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_URL:-http://}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   blog-data:
+  caddy-data:
+  caddy-config:

@@ -31,14 +31,13 @@
 
 ## 快速开始
 
-Docker 部署可直接在项目根目录运行（PowerShell）：
+Docker 部署可直接在项目根目录运行：
 
-```powershell
-Copy-Item .env.docker.example .env.docker
-docker compose --env-file .env.docker up -d --build
+```sh
+docker compose up -d --build
 ```
 
-默认访问 `http://localhost:8080/`。正式部署前修改 `.env.docker` 中的 `SITE_URL`；SQLite 与媒体使用持久数据卷。配置复制只需一次，更新时直接重新构建启动。详见 [Docker 部署说明](docs/docker.md)。
+只有公网 IP 时，先在 `.env` 中填写 `SITE_URL=http://你的公网IP`，再执行上面的命令，通过服务器的 80 端口访问。绑定域名时改为 `SITE_URL=https://你的域名`，Caddy 会自动申请和续期 HTTPS 证书；SQLite、媒体和证书均使用持久数据卷。详见 [Docker 部署说明](docs/docker.md)。
 
 本机 Node 运行方式：
 

@@ -1,0 +1,8 @@
+{$SITE_ADDRESS:http://} {
+	encode zstd gzip
+	reverse_proxy blog:4324 {
+		health_uri /api/health
+		health_interval 30s
+		health_timeout 5s
+	}
+}
