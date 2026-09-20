@@ -8,11 +8,30 @@
 <script>
   if (window.self === window.top) {
     const container = document.getElementById('immortal-mist');
-    if (container) {
+    if (container && document.documentElement.dataset.realmMode !== 'static') {
+      const controller = new AbortController();
+      const skip = () => controller.abort();
+      const detach = () => {
+        document.removeEventListener('realm:skip', skip);
+        document.removeEventListener('realm:ready', detach);
+        document.removeEventListener('realm:fallback', detach);
+      };
+      document.addEventListener('realm:skip', skip, { once: true });
+      document.addEventListener('realm:ready', detach, { once: true });
+      document.addEventListener('realm:fallback', detach, { once: true });
+      const onProgress = (detail: { stage: string; completed?: number; total?: number; failed?: number }) => {
+        if (!controller.signal.aborted) document.dispatchEvent(new CustomEvent('realm:loading', { detail }));
+      };
+      onProgress({ stage: 'summon' });
       import('../world/world.js')
-        .then(({ createWorld }) => createWorld(container))
+        .then(({ createWorld }) => {
+          controller.signal.throwIfAborted();
+          return createWorld(container, { signal: controller.signal, onProgress });
+        })
         .catch((error) => {
+          if (controller.signal.aborted) { detach(); return; }
           console.error('The realm renderer could not start.', error);
+          document.documentElement.dataset.realmState = 'fallback';
           document.dispatchEvent(new CustomEvent('realm:fallback'));
         });
     }

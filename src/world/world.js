@@ -2,11 +2,14 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createAtmosphere, skies } from './atmosphere.js';
 import { createWorldModels } from './models.js';
-import { loadRealmAssets } from './assets.js';
+import { loadRealmAssets, disposeRealmAssets } from './assets.js';
 import { locations } from './locations';
 
-export async function createWorld(container) {
-  const imported = await loadRealmAssets();
+export async function createWorld(container, { signal, onProgress = () => {} } = {}) {
+  signal?.throwIfAborted();
+  const imported = await loadRealmAssets({ signal, onProgress });
+  if (signal?.aborted) { disposeRealmAssets(imported); signal.throwIfAborted(); }
+  onProgress({ stage: 'scene' });
   const interactive = document.body.classList.contains('site-home');
   const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
   const abort = new AbortController();
@@ -15,7 +18,11 @@ export async function createWorld(container) {
   canvas.className = 'world-canvas';
   canvas.setAttribute('aria-label', interactive ? '青野洞天三维场景。拖动或用方向键环顾，滚轮或加减键缩放；也可使用洞天图录选择地点。' : '');
   if (interactive) canvas.tabIndex = 0; else canvas.setAttribute('aria-hidden','true');
+  // Keep a cleanup stack for failures partway through initialization as well as first-frame errors.
+  const initializationCleanup = [() => disposeRealmAssets(imported), () => abort.abort(), () => canvas.remove()];
+  try {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+  initializationCleanup.push(() => renderer.dispose());
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = skies.dawn.exposure;
@@ -29,6 +36,11 @@ export async function createWorld(container) {
   const timerExtension=gl.getExtension('EXT_disjoint_timer_query_webgl2');
   let gpuQuery=null;
   const scene = new THREE.Scene();
+  initializationCleanup.push(() => {
+    const geometries = new Set(), materials = new Set();
+    scene.traverse(obj => { if (obj.geometry) geometries.add(obj.geometry); for (const material of [obj.material].flat().filter(Boolean)) materials.add(material); });
+    geometries.forEach(geometry => geometry.dispose()); materials.forEach(material => material.dispose());
+  });
   scene.fog = new THREE.FogExp2(skies.dawn.fog, .0024);
   const camera = new THREE.PerspectiveCamera(43, 1, .5, 2600);
   const overviewTarget = new THREE.Vector3(innerWidth<700?0:-17, 11, 0);
@@ -49,15 +61,19 @@ export async function createWorld(container) {
   const fill = new THREE.DirectionalLight('#a1d6ed',1.0);
   fill.position.set(80,50,90);scene.add(fill);
   const atmosphere = createAtmosphere(renderer,scene,camera);
+  initializationCleanup.push(() => atmosphere.dispose());
   const models = createWorldModels(scene,locations,imported);
   const envScene = new THREE.Scene();
   const envSky = atmosphere.sky.clone();
   envScene.add(envSky);
   const pmrem = new THREE.PMREMGenerator(renderer);
+  initializationCleanup.push(() => pmrem.dispose());
   let environment = pmrem.fromScene(envScene, 0, .1, 2500);
+  initializationCleanup.push(() => environment.dispose());
   scene.environment = environment.texture;
   scene.environmentIntensity = .6;
   const controls = new OrbitControls(camera,canvas);
+  initializationCleanup.push(() => controls.dispose());
   controls.target.copy(overviewTarget);
   controls.enablePan=false;
   controls.enableDamping=true;
@@ -104,6 +120,7 @@ export async function createWorld(container) {
     invalid=true;requestFrame();
   }
   const resizeObserver=new ResizeObserver(resize);
+  initializationCleanup.push(() => resizeObserver.disconnect(), () => { disposed=true; cancelAnimationFrame(frame); });
   resizeObserver.observe(container);
 
   function updatePins() {
@@ -120,7 +137,13 @@ export async function createWorld(container) {
 
   function requestFrame() {
     if(pendingFrame||isPaused())return;
-    pendingFrame=true;frame=requestAnimationFrame(render);
+    pendingFrame=true;frame=requestAnimationFrame(now => {
+      try { render(now); }
+      catch (error) {
+        console.error('The realm frame could not render.', error);
+        fallback();
+      }
+    });
   }
   function render(now) {
     pendingFrame=false;
@@ -159,6 +182,7 @@ export async function createWorld(container) {
       invalid=false;
       if(!container.classList.contains('is-ready')){
         container.classList.add('is-ready');
+        document.documentElement.dataset.realmState='ready';
         document.dispatchEvent(new CustomEvent('realm:ready'));
       }
     }
@@ -241,6 +265,7 @@ export async function createWorld(container) {
   listen(document,'visibilitychange',()=>{hidden=document.hidden;previous=0;if(hidden){cancelAnimationFrame(frame);pendingFrame=false;}else requestFrame();});
   listen(motionQuery,'change',()=>{invalid=true;requestFrame();});
   const observer=new MutationObserver(()=>{invalid=true;requestFrame();});
+  initializationCleanup.push(() => observer.disconnect());
   observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-motion']});
   function dispose() {
     if(disposed)return;
@@ -250,12 +275,18 @@ export async function createWorld(container) {
     const geometries=new Set(),materials=new Set();
     scene.traverse(obj=>{if(obj.geometry)geometries.add(obj.geometry);if(obj.material)materials.add(obj.material);});
     geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());
+    signal?.removeEventListener('abort', dispose);
     renderer.dispose();canvas.remove();
   }
-  listen(canvas,'webglcontextlost',event=>{
-    event.preventDefault();dispose();container.classList.remove('is-ready');
+  function fallback() {
+    dispose();container.classList.remove('is-ready');
+    document.documentElement.dataset.realmState='fallback';
     document.dispatchEvent(new CustomEvent('realm:fallback'));
+  }
+  listen(canvas,'webglcontextlost',event=>{
+    event.preventDefault();fallback();
   });
+  signal?.addEventListener('abort', dispose, { once: true });
   listen(window,'pagehide',event=>{if(event.persisted){hidden=true;cancelAnimationFrame(frame);pendingFrame=false;}else dispose();});
   listen(window,'pageshow',()=>{hidden=false;previous=0;requestFrame();});
   container.prepend(canvas);
@@ -266,4 +297,9 @@ export async function createWorld(container) {
   try {atmosphere.setWind(localStorage.getItem('qy_wind')||'breeze');}catch{}
   const initial=location.hash.slice(1);
   if(locations.some(p=>p.id===initial))travel(initial,document.getElementById('world-ui')?.dataset.inspecting==='true');
+  } catch (error) {
+    for (const cleanup of initializationCleanup.reverse()) { try { cleanup(); } catch {} }
+    container.classList.remove('is-ready');
+    throw error;
+  }
 }

@@ -1,0 +1,73 @@
+/* Critical CSS is inlined: entering the site must not need another image, font or JS chunk. */
+html[data-loading] { overflow: hidden; }
+.realm-loading[hidden], .realm-loading [hidden] { display: none !important; }
+.realm-loading { position: fixed; inset: 0; z-index: 1000; isolation: isolate; overflow: auto; display: grid; grid-template-rows: 1fr auto; min-height: 100svh; padding: max(30px, env(safe-area-inset-top)) max(32px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left)); color: #f3f1e7; background: #395b69; font: 14px/1.7 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif; text-align: center; transition: opacity .48s ease, visibility .48s; }
+.realm-loading, .realm-loading * { box-sizing: border-box; }
+.realm-loading:focus { outline: none; }
+.realm-loading.is-leaving { opacity: 0; visibility: hidden; pointer-events: none; }
+.realm-loading a, .realm-loading button { color: #f3f1e7; }
+.realm-loading :focus-visible { outline: 2px solid #eddbaf; outline-offset: 6px; border-radius: 3px; }
+.loading-mist { position: absolute; inset: 0; z-index: -2; overflow: hidden; background: radial-gradient(ellipse at 80% 7%,#abc7cf60,transparent 60%),radial-gradient(ellipse at 15% 65%,#7499ab7a,transparent 55%),linear-gradient(150deg,#345562,#648895 65%,#3b5c69); }
+.loading-mist::after { content: ''; position: absolute; inset: 15% -10% -15%; background: radial-gradient(ellipse at 30% 75%,#c8d7dc4a,transparent 53%),radial-gradient(ellipse at 85% 90%,#dbe5e747,transparent 45%); animation: loading-mist-drift 14s ease-in-out infinite alternate; }
+.loading-mountains { position: absolute; bottom: 0; left: 0; width: 100%; height: 55%; z-index: -1; pointer-events: none; mask-image: linear-gradient(transparent,#000 30%,#0008); }
+.loading-ridge-far { fill: #244955; opacity: .15; }
+.loading-ridge-near { fill: #163d4c; opacity: .16; }
+.loading-brand { position: absolute; top: max(30px, env(safe-area-inset-top)); left: max(40px, env(safe-area-inset-left)); display: flex; align-items: center; gap: 15px; color: #e2e4d9; text-align: left; }
+.loading-brand > svg { width: 42px; height: 42px; color: #dacba8; }
+.loading-brand > span { font: 22px/1.4 'STKaiti','KaiTi','Kaiti SC','Noto Serif SC','SimSun',serif; letter-spacing: .2em; }
+.loading-brand small { display: block; margin-top: 4px; font: 8px/1.5 Georgia,serif; letter-spacing: .55em; }
+.loading-center { align-self: center; justify-self: center; width: min(100%,440px); padding: 92px 0 40px; }
+.loading-sigil { width: clamp(136px,19vh,190px); margin: 0 auto 24px; color: #e5cda1; }
+.loading-sigil svg { display: block; width: 100%; stroke: currentColor; stroke-width: 1; }
+.loading-orbit-base { opacity: .28; }
+.loading-orbit { transform-origin: 100px 100px; animation: loading-orbit 16s linear infinite; }
+.loading-inner-orbit { transform-origin: 100px 100px; opacity: .65; animation: loading-orbit 24s linear infinite reverse; }
+.loading-mountain-mark { stroke-width: 1.3; }
+.realm-loading h2 { margin: 0; color: #f6f1e4; font: 400 clamp(30px,3vw,42px)/1.5 'STKaiti','KaiTi','Kaiti SC','Noto Serif SC','SimSun',serif; letter-spacing: .24em; padding-left: .24em; }
+.realm-loading #loading-description { margin: 14px 0 0; font: 15px/1.9 'STKaiti','KaiTi','Kaiti SC','Noto Serif SC','SimSun',serif; color: #e1e8e7; letter-spacing: .13em; }
+.loading-stages { display: flex; gap: 14px; width: min(100%,300px); margin: 32px auto 18px; padding: 0; list-style: none; font: 13px/1.8 'STKaiti','KaiTi','Kaiti SC','Noto Serif SC','SimSun',serif; letter-spacing: .15em; }
+.loading-stages li { flex: 1; color: #c4d2d5; }
+.loading-stages span { display: block; height: 2px; margin-bottom: 12px; overflow: hidden; background: #c9d8db36; }
+.loading-stages span::after { content: ''; display: block; height: 100%; background: #e5cda1; transform: scaleX(0); transform-origin: left; transition: transform .35s ease; }
+.loading-stages .is-complete span::after { transform: scaleX(1); }
+.loading-stages [aria-current='step'] { color: #f1d9ad; }
+.loading-stages [aria-current='step'] span::after { transform: scaleX(.45); animation: loading-stage-breathe 2.4s ease-in-out infinite; }
+.loading-status { min-height: 24px; margin: 0; color: #e4e9e5; font-size: 12px; letter-spacing: .1em; font-variant-numeric: tabular-nums; }
+.loading-recovery { margin: 20px auto 0; }
+.loading-recovery p { margin: 0 0 12px; font-size: 12px; color: #e1e6e3; }
+.loading-recovery button { min-height: 44px; padding: 8px 22px; border: 1px solid #e3d5af70; border-radius: 3px; background: #173a4730; font: inherit; letter-spacing: .12em; cursor: pointer; }
+.loading-recovery button:hover { background: #173a4760; }
+.loading-exit { align-self: end; padding-bottom: 8px; }
+.loading-exit a { display: inline-flex; gap: 14px; align-items: center; min-height: 44px; padding: 8px 16px; font: 16px/1.7 'STKaiti','KaiTi','Kaiti SC','Noto Serif SC','SimSun',serif; letter-spacing: .15em; text-decoration: none; }
+.loading-exit a:hover { color: #f7dfad; }
+.loading-exit p { margin: 0; color: #d3dedf; font-size: 11px; letter-spacing: .1em; }
+.loading-footer { position: absolute; bottom: max(25px, env(safe-area-inset-bottom)); left: 40px; right: 40px; display: flex; justify-content: space-between; pointer-events: none; color: #cad9d9; font: 11px/1.5 'STKaiti','KaiTi','Kaiti SC','Noto Serif SC','SimSun',serif; letter-spacing: .16em; }
+.realm-loading[data-mode='page'] .loading-stages { display: none; }
+.realm-loading[data-mode='page'] .loading-status { margin-top: 24px; }
+@keyframes loading-orbit { to { transform: rotate(360deg); } }
+@keyframes loading-mist-drift { to { transform: translate3d(3%,-3%,0); } }
+@keyframes loading-stage-breathe { 50% { opacity: .4; } }
+@media (max-width: 600px) {
+  .realm-loading { padding: max(24px,env(safe-area-inset-top)) 24px max(28px,env(safe-area-inset-bottom)); }
+  .loading-brand { left: 24px; top: max(24px,env(safe-area-inset-top)); gap: 11px; }
+  .loading-brand > svg { width: 34px; height: 34px; }
+  .loading-brand > span { font-size: 19px; }
+  .loading-center { padding-top: 92px; padding-bottom: 30px; }
+  .realm-loading #loading-description { font-size: 13px; letter-spacing: .08em; }
+  .loading-stages { width: 260px; margin-top: 28px; }
+  .loading-footer { display: none; }
+  .loading-recovery p { font-size: 11px; }
+}
+@media (max-height: 620px) {
+  .loading-brand { top: 16px; }
+  .loading-center { padding-top: 65px; padding-bottom: 20px; }
+  .loading-sigil { width: 105px; margin-bottom: 10px; }
+  .realm-loading h2 { font-size: 28px; }
+  .realm-loading #loading-description { margin-top: 5px; }
+  .loading-stages { margin-top: 18px; margin-bottom: 10px; }
+  .loading-footer { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .realm-loading, .realm-loading *, .realm-loading *::after { animation: none !important; transition: none !important; }
+}
+html[data-motion='off'] .realm-loading, html[data-motion='off'] .realm-loading *, html[data-motion='off'] .realm-loading *::after { animation: none !important; transition: none !important; }

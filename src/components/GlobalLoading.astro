@@ -1,0 +1,41 @@
+---
+import RealmMark from './RealmMark.astro';
+import bootstrap from '../loading/bootstrap.js?raw';
+
+interface Props { home: boolean; }
+const { home } = Astro.props;
+---
+<div id="global-loading" class="realm-loading" data-mode={home ? 'realm' : 'page'} data-stage="summon" role="dialog" aria-modal="true" aria-labelledby="loading-title" aria-describedby="loading-description" tabindex="-1" hidden>
+  <div class="loading-mist" aria-hidden="true"></div>
+  <svg class="loading-mountains" viewBox="0 0 1600 500" preserveAspectRatio="none" aria-hidden="true">
+    <path class="loading-ridge-far" d="M0 170 55 125 87 150 140 58 173 111 204 86 247 178 297 153 348 234 396 217 462 304 517 265 602 349 692 321 774 389 843 338 921 363 990 291 1044 317 1118 215 1161 243 1226 148 1267 191 1321 70 1356 125 1400 88 1448 173 1498 102 1551 153 1600 103V500H0Z" />
+    <path class="loading-ridge-near" d="M0 300 64 256 107 284 163 204 196 249 227 232 300 328 340 295 418 378 510 339 591 413 694 389 820 455 938 401 1000 424 1080 348 1128 380 1189 283 1240 325 1297 228 1330 267 1369 242 1430 322 1494 247 1542 284 1600 225V500H0Z" />
+  </svg>
+  <div class="loading-brand" aria-hidden="true"><RealmMark /><span>青野 · 洞天<small>QINGYE</small></span></div>
+  <div class="loading-center">
+    <div class="loading-sigil" aria-hidden="true">
+      <svg viewBox="0 0 200 200" fill="none">
+        <circle cx="100" cy="100" r="89" class="loading-orbit-base" />
+        <g class="loading-orbit"><circle cx="100" cy="100" r="89" stroke-dasharray="164 28 90 277" /><circle cx="100" cy="11" r="3" fill="currentColor" stroke="none" /><circle cx="177" cy="145" r="2.5" fill="currentColor" stroke="none" /></g>
+        <circle class="loading-inner-orbit" cx="100" cy="100" r="72" stroke-dasharray="130 50 63 209" />
+        <path class="loading-mountain-mark" d="m41 120 24-22 11 8 19-43q5-10 10 0l22 43 12-10 24 24M67 120l24-28q9-11 17 0l28 28M81 119l15-15q4-4 8 0l16 15M32 124h136M51 136q20-6 37 0t38 0m-61 10q19-5 38 0t32 0" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="130" cy="66" r="6" fill="currentColor" stroke="none" opacity=".85" />
+      </svg>
+    </div>
+    <h2 id="loading-title">{home ? '云境渐开' : '书卷渐展'}</h2>
+    <p id="loading-description">{home ? '山川正在凝形，请稍候片刻' : '一卷山中事，正待与你相逢'}</p>
+    <ol class="loading-stages" aria-label="入境阶段">
+      <li data-loading-stage="summon" aria-current="step"><span></span>引灵</li>
+      <li data-loading-stage="models"><span></span>聚形</li>
+      <li data-loading-stage="scene"><span></span>入境</li>
+    </ol>
+    <p id="loading-status" class="loading-status" role="status" aria-live="polite" aria-atomic="true">{home ? '正在唤醒云境' : '正在准备书卷'}</p>
+    <div id="loading-recovery" class="loading-recovery" hidden>
+      <p>云路稍远，可继续等待，或先静览山川。</p>
+      <button id="loading-static" type="button">静览入境 <span aria-hidden="true">→</span></button>
+    </div>
+  </div>
+  <div class="loading-exit"><a href="/blog/">先行阅卷 <span aria-hidden="true">→</span></a><p>无需等待三维场景</p></div>
+  <div class="loading-footer" aria-hidden="true"><span>青野山房</span><span>山海无界 · 心之所往</span></div>
+</div>
+<script is:inline set:html={bootstrap} />
