@@ -60,6 +60,9 @@
 .discovery-mark { font-size: 22px; color: var(--world-gold); }
 .world-discovery b { font: normal 17px Georgia,serif; margin-left: 7px; color: #f0dfb7; }
 .world-discovery i { font-style: normal; opacity: .5; margin-left: 5px; }
+.world-fallback-actions { display: none; position: absolute; top: 116px; right: 4.1vw; gap: 12px; }
+html[data-realm-state='fallback'] .world-fallback-actions { display: flex; }
+.world-fallback-actions a { min-height: 44px; padding: 8px 12px; color: var(--world-gold); border: 1px solid #dbca9f66; border-radius: 3px; background: #173a4790; font: 12px/2 var(--font-title); }
 .discovery-line { width: 34px; height: 1px; background: #d4dfc84a; }
 .world-bottom { position: absolute; inset: auto 4.1% 28px; display: flex; align-items: center; justify-content: space-between; gap: 35px; }
 .world-compass { display: flex; align-items: center; gap: 13px; flex-shrink: 0; color: #dbc99f !important; }

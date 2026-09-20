@@ -32,6 +32,7 @@ const tags = [...new Set(posts.flatMap(p => p.data.tags))];
     </div>
     <div class="world-weather"><span class="weather-orbit" aria-hidden="true">☼</span><span id="world-weather-name">辰时 · 云海初晴</span><i></i><span>宜 · 问道</span></div>
     <div class="world-discovery"><span class="discovery-mark" aria-hidden="true">◇</span><span>洞天足迹 <b id="world-visited">00</b><i>/ 06</i></span><span class="discovery-line"></span><span id="world-status" role="status" aria-live="polite">云境正在苏醒…</span></div>
+    <div class="world-fallback-actions"><a href="/blog/">先行阅卷 →</a><a href="/">重试入境 ↗</a></div>
     <aside class="place-sheet" id="place-sheet" aria-label="地点详情" hidden>
       <button class="place-close" id="place-close" aria-label="返回洞天全景">↙ <span>回望全境</span></button>
       {locations.map((place, i) => <section class="place-content" data-place={place.id} hidden aria-labelledby={`place-title-${place.id}`}>

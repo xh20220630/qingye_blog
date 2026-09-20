@@ -3,6 +3,8 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ImmortalMist from '../components/ImmortalMist.astro';
 import FloatTools from '../components/FloatTools.astro';
+import GlobalLoading from '../components/GlobalLoading.astro';
+import loadingStyles from '../styles/loading.css?raw';
 import '../styles/global.css';
 import '../styles/world.css';
 import '../styles/community.css';
@@ -46,6 +48,7 @@ const isHome = Astro.url.pathname === '/';
     {noindex && <meta name="robots" content="noindex,follow" />}
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#dce7ed" />
+    <style is:inline set:html={loadingStyles} />
     <meta property="og:site_name" content={site} />
     <meta property="og:title" content={ogTitle ?? fullTitle} />
     <meta property="og:description" content={description} />
@@ -76,11 +79,12 @@ const isHome = Astro.url.pathname === '/';
     <a class="skip-link" href="#main-content">跳至正文</a>
     <ImmortalMist />
     {!isHome && <Header />}
-    <main id="main-content">
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
     {!isHome && <Footer />}
     {!isHome && <FloatTools />}
+    <GlobalLoading home={isHome} />
 <script>
   if (window.self !== window.top) {
     document.addEventListener('click', (event) => {

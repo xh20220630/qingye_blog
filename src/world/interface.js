@@ -153,11 +153,19 @@ if(ui){
     else if(!inspection.hidden)travel(selected,true);
     else if(selected)overview(true);
   });
-  document.addEventListener('realm:ready',()=>{if(!selected)status.textContent='点亮一座仙山，开启一段因缘';ui.classList.add('world-ready');});
-  document.addEventListener('realm:fallback',()=>{
+  function realmReady(){
+    if(root.dataset.realmMode==='static')return;
+    if(!selected)status.textContent='点亮一座仙山，开启一段因缘';
+    ui.classList.add('world-ready');ui.classList.remove('world-fallback');
+  }
+  function realmFallback(){
     status.textContent='静览云境 · 仍可循图录游历';ui.classList.add('world-fallback');
     ui.querySelectorAll('[data-pin]').forEach(pin=>{pin.classList.remove('is-offscreen');pin.tabIndex=0;});
-  });
+  }
+  document.addEventListener('realm:ready',realmReady);
+  document.addEventListener('realm:fallback',realmFallback);
+  if(root.dataset.realmState==='ready')realmReady();
+  else if(root.dataset.realmState==='fallback')realmFallback();
   const initial=location.hash.slice(1);
   if(locations.some(p=>p.id===initial))travel(initial);
 }
