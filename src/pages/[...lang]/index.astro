@@ -1,0 +1,41 @@
+---
+import PostList from '@/components/PostList.astro'
+import { allLocales } from '@/config'
+import { getLangFromLocale, getLangRouteParam } from '@/i18n/lang'
+import Layout from '@/layouts/Layout.astro'
+import { getPinnedPosts, getPostsByYear } from '@/utils/content'
+
+export async function getStaticPaths() {
+  return allLocales.map(lang => ({
+    params: { lang: getLangRouteParam(lang) },
+  }))
+}
+
+const currentLang = getLangFromLocale(Astro.currentLocale)
+const pinnedPosts = await getPinnedPosts(currentLang)
+const postsByYear = await getPostsByYear(currentLang)
+---
+
+<Layout>
+  {pinnedPosts.length === 0 && postsByYear.size === 0 && (
+    <section class="mb-7.5">
+      <div class="uno-decorative-line" />
+      <p class="text-4 c-secondary leading-1.8em">还没有文章。</p>
+      <p class="mt-2 text-3.5 c-secondary/70 leading-1.8em">留一页空白，等下一次落笔。</p>
+    </section>
+  )}
+
+  {pinnedPosts.length > 0 && (
+    <section class="mb-7.5">
+      <div class="uno-decorative-line" />
+      <PostList posts={pinnedPosts} lang={currentLang} pinned={true} />
+    </section>
+  )}
+
+  {Array.from(postsByYear.entries(), ([_year, posts]) => (
+    <section class="mb-7.5">
+      <div class="uno-decorative-line" />
+      <PostList posts={posts} lang={currentLang} />
+    </section>
+  ))}
+</Layout>

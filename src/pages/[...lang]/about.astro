@@ -1,0 +1,32 @@
+---
+import { getCollection, render } from 'astro:content'
+import GitHubProjects from '@/components/GitHubProjects.astro'
+import { allLocales, themeConfig } from '@/config'
+import github from '@/data/github.json'
+import { getLangFromLocale, getLangRouteParam } from '@/i18n/lang'
+import Layout from '@/layouts/Layout.astro'
+
+export async function getStaticPaths() {
+  return allLocales.map(lang => ({
+    params: { lang: getLangRouteParam(lang) },
+  }))
+}
+
+const currentLang = getLangFromLocale(Astro.currentLocale)
+const allAboutEntries = await getCollection('about')
+const aboutEntry = allAboutEntries.find(entry => entry.data.lang === currentLang)
+  ?? allAboutEntries.find(entry => entry.data.lang === '')
+const { Content } = aboutEntry ? await render(aboutEntry) : { Content: null }
+---
+
+<Layout>
+  <div class="uno-decorative-line" />
+  <div class="heti">
+    <h2 class="mt-0!">关于{themeConfig.site.author}</h2>
+    {Content ? <Content /> : <p>{themeConfig.site.description}</p>}
+    <p>
+      你可以在 <a href={github.url} target="_blank" rel="noopener noreferrer">GitHub · @{github.username}</a> 找到我的项目和代码。
+    </p>
+  </div>
+  <GitHubProjects />
+</Layout>

@@ -1,11 +1,16 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import { base } from '@/config'
+import Layout from '@/layouts/Layout.astro'
 ---
-<BaseLayout title="迷路的道友" description="404：此间云雾太浓，道友似乎迷失了方向。">
-  <div class="container lost-wrap">
-    <div class="lost-code">404</div>
-    <h1 class="lost-title">迷路的道友</h1>
-    <p class="lost-desc">此间云雾太浓，你要寻的那卷玉简，或已羽化，或从未落笔。不如随青灯指引，回山房正门再行参详。</p>
-    <a class="btn-jade" href="/">返回山房</a>
-  </div>
-</BaseLayout>
+
+<Layout>
+  <div class="uno-decorative-line" />
+  <h3 class="mt--1.3 flex flex-col text-8 c-primary font-bold leading-1.2em font-navbar lg:text-9">
+    <span>404</span>
+    <span>这一页不在这里。</span>
+  </h3>
+  <p class="mt-3.6 flex flex-col text-3.6 leading-1.4em font-navbar lg:(mt-4 text-4)">
+    <span>页面可能已移除，或还没有写下。</span>
+    <a class="highlight-hover mt-4 w-fit hover:c-primary" href={`${base}/`}>回到首页</a>
+  </p>
+</Layout>

@@ -1,0 +1,23 @@
+---
+import TagList from '@/components/TagList.astro'
+import { allLocales } from '@/config'
+import { getLangFromLocale, getLangRouteParam } from '@/i18n/lang'
+import Layout from '@/layouts/Layout.astro'
+import { getAllTags } from '@/utils/content'
+
+export async function getStaticPaths() {
+  return allLocales.map(lang => ({
+    params: { lang: getLangRouteParam(lang) },
+  }))
+}
+
+const currentLang = getLangFromLocale(Astro.currentLocale)
+const allTags = await getAllTags(currentLang)
+---
+
+<Layout>
+  <div class="uno-decorative-line" />
+  {allTags.length > 0
+    ? <TagList tags={allTags} lang={currentLang} />
+    : <p class="text-4 c-secondary leading-1.8em">还没有标签。</p>}
+</Layout>
