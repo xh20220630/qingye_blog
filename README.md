@@ -88,6 +88,19 @@ docker compose --env-file .env.docker up -d --build
 
 容器使用 Nginx 提供静态文件，不再运行旧版 Node API，也不挂载旧数据库卷。升级不会主动删除已有 Docker 数据卷。
 
+### 使用 Caddy 提供公网入口
+
+服务器使用 Caddy 占用 80 / 443 端口时，部署命令需同时加载 `compose.caddy.yaml`。在 `.env.docker` 中将 `SITE_URL` 和 `SITE_ADDRESS` 都设为实际访问地址，例如 `http://106.53.216.157`；使用域名和 HTTPS 时填写 `https://你的域名`。博客的 `QY_BIND_IP` 可继续保留 `127.0.0.1`，Caddy 通过 Docker 网络访问 `blog:4324`。
+
+```bash
+docker compose --env-file .env.docker -f compose.yaml -f compose.caddy.yaml config --quiet
+docker compose --env-file .env.docker -f compose.yaml -f compose.caddy.yaml up -d --build
+```
+
+后续更新和停止服务时也应使用相同的两个 Compose 文件。已有服务器使用 `.env` 时，可以省略 `--env-file .env.docker`，继续读取 `.env`。Caddy 的证书与配置沿用 `caddy-data`、`caddy-config` 命名卷。
+
+从旧版升级时，Caddy 的健康检查必须使用 `/`。旧版的 `/api/health` 在静态博客中返回 404，会让代理将正常博客判为不健康，导致公网出现 503。若看到 `qingye-blog-caddy-1` 的孤立容器提示，需使用上述两个 Compose 文件将其纳入管理；`--remove-orphans` 会移除未纳入当前配置的公网入口容器。
+
 ## 主题来源
 
 本项目引入 Retypeset 上游提交 `a636b6d393be714cab52d3fc4baddd3f3905f701`，保留其 MIT 许可证和页脚署名。完整使用说明见 [Retypeset 主题指南](https://retypeset.radishzz.cc/posts/theme-guide/)。后续更新上游时，请检查个人配置、空状态和部署文件的合并结果。
