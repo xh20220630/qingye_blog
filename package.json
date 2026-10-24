@@ -20,7 +20,6 @@
     "format-posts": "tsx scripts/format-posts.ts",
     "update-theme": "tsx scripts/update-theme.ts",
     "check": "astro check",
-    "test:markdown": "node scripts/check-markdown.mjs",
     "start": "astro preview --host 0.0.0.0"
   },
   "dependencies": {

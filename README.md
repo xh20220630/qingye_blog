@@ -2,7 +2,7 @@
 
 基于 [Retypeset](https://github.com/radishzzz/astro-theme-retypeset) 重建的个人博客，使用 Astro、TypeScript 和 UnoCSS。保留主题原生的版式、明暗切换、文章目录、代码高亮、数学公式、RSS / Atom 和 Sitemap。
 
-旧主题、旧文章、三维场景、互动后端和素材已移除。主题附带的演示文章也已清空，目前已发布一篇自建的 [Markdown 渲染实验室](src/content/posts/markdown-rendering-lab.md)，用于查看本站支持的排版和交互。默认使用简体中文，评论、统计与第三方站点验证均未启用。
+旧主题、旧文章、三维场景、互动后端和素材已移除，演示文章也已清空。默认使用简体中文，评论、统计与第三方站点验证均未启用。
 
 ## 本地运行
 
@@ -59,16 +59,11 @@ lang: zh
 
 文章路径是 `/posts/my-first-post/`。`draft: true` 的文章仅在开发模式可见；`pin` 为 1 到 99 时置顶，数值越大越靠前。修改内容后需要重新构建，文章字段以 `src/content.config.ts` 为准。
 
-## Markdown 渲染验证
+## Markdown 支持
 
-访问 `/posts/markdown-rendering-lab/` 可查看基础 Markdown、GFM、代码复制、图片与画廊、KaTeX、Mermaid、提示块、折叠内容和媒体嵌入样例。文章中的代码复制核验区仅供本地粘贴检查，不会提交内容。
+文章支持基础 Markdown、GFM、代码复制、图片与画廊、KaTeX、Mermaid、提示块、折叠内容和媒体嵌入。
 
-```bash
-pnpm build
-pnpm test:markdown
-```
-
-静态验证共 16 组，覆盖文章 HTML、首页入口、标签、订阅、Sitemap 和分享图片。也可通过 `node scripts/check-markdown.mjs /path/to/dist` 检查指定构建目录。浏览器交互与第三方服务的验证结果见 [Markdown 渲染测试报告](docs/markdown-rendering-report.md)。GitHub 仓库卡片会先显示本站保存的公开项目资料，再尝试更新，避免接口限流时卡片空白。
+GitHub 仓库卡片会先显示本站保存的公开项目资料，再尝试更新，避免接口限流时卡片空白。
 
 ## Docker 部署
 
